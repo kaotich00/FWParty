@@ -1,7 +1,7 @@
-package it.tigierrei.fwparty;
+package it.tigierrei.fwparty.config;
 
 import com.google.common.reflect.TypeToken;
-import com.typesafe.config.ConfigIncludeContext;
+import it.tigierrei.fwparty.FWParty;
 import ninja.leaping.configurate.ConfigurationOptions;
 import ninja.leaping.configurate.commented.CommentedConfigurationNode;
 import ninja.leaping.configurate.hocon.HoconConfigurationLoader;

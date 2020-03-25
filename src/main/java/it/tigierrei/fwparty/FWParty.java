@@ -1,7 +1,8 @@
 package it.tigierrei.fwparty;
 
 import com.google.inject.Inject;
-import com.typesafe.config.ConfigValue;
+import it.tigierrei.fwparty.config.ConfigManager;
+import it.tigierrei.fwparty.config.ConfigValues;
 import it.tigierrei.fwparty.listener.PlayerListener;
 import ninja.leaping.configurate.objectmapping.GuiceObjectMapperFactory;
 import org.slf4j.Logger;

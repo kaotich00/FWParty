@@ -1,4 +1,4 @@
-package it.tigierrei.fwparty;
+package it.tigierrei.fwparty.config;
 
 import ninja.leaping.configurate.objectmapping.Setting;
 import ninja.leaping.configurate.objectmapping.serialize.ConfigSerializable;
