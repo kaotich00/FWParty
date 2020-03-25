@@ -6,10 +6,13 @@ import it.tigierrei.fwparty.party.Party;
 import it.tigierrei.fwparty.party.PartyManager;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.command.CommandResult;
+import org.spongepowered.api.command.CommandSource;
+import org.spongepowered.api.command.args.CommandContext;
 import org.spongepowered.api.command.args.GenericArguments;
 import org.spongepowered.api.command.spec.CommandSpec;
 import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.text.Text;
+import org.spongepowered.api.text.format.TextColors;
 import org.spongepowered.api.text.serializer.TextSerializers;
 
 public class PartyCommands {
@@ -246,6 +249,28 @@ public class PartyCommands {
                 return CommandResult.success();
             })
             .build();
+    
+    private final CommandSpec chat = CommandSpec.builder()
+    		.arguments(GenericArguments.remainingJoinedStrings(Text.of("message")))
+    		.executor((src, args) -> {
+                if (src instanceof Player) {
+	                Player player = (Player) src;
+	                PartyManager partyManager = plugin.getPartyManager();
+	    			if (partyManager.isPlayerInParty(player) || partyManager.doesPartyExist(player)) {
+		                for (Player p : partyManager.getPlayerParty(player).getPlayerList()) {
+		                	String message = args.<String>getOne("message").get();
+		                    p.sendMessage(Text.builder("[PARTY] " + player + ": " + message).color(TextColors.GREEN).build());
+		                }
+	    			} else {
+                        player.sendMessages(Text.of(plugin.getConfigValues().not_on_party));
+	    			}
+                } else {
+                    src.sendMessage(Text.of("Only players can run that command"));
+                }
+
+                return CommandResult.success();
+            })
+    		.build();
 
     private final CommandSpec help = CommandSpec.builder()
             .arguments(GenericArguments.onlyOne(GenericArguments.string(Text.of("password"))))
@@ -261,7 +286,8 @@ public class PartyCommands {
                                     "/party accept\n" +
                                     "/party decline\n" +
                                     "/party leave\n" +
-                                    "/party kick <player>"
+                                    "/party kick <player>\n" +
+                                    "/party chat"
                     ));
                 } else {
                     src.sendMessage(Text.of("Only players can run that command"));
@@ -277,6 +303,7 @@ public class PartyCommands {
             .child(decline, "decline", "declina", "rifuta")
             .child(leave,"leave","esci")
             .child(kick,"kick","rimuovi")
+            .child(chat,"chat","c")
             .build();
 
     public void registerCommands(){

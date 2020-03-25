@@ -4,6 +4,7 @@ import it.tigierrei.fwparty.exception.InvalidPartyException;
 import org.spongepowered.api.entity.living.player.Player;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 public class PartyManager {
