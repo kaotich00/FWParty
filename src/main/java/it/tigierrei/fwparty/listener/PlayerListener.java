@@ -1,8 +1,8 @@
 package it.tigierrei.fwparty.listener;
 
 import it.tigierrei.fwparty.FWParty;
-import it.tigierrei.fwparty.Party;
-import it.tigierrei.fwparty.PartyManager;
+import it.tigierrei.fwparty.party.Party;
+import it.tigierrei.fwparty.party.PartyManager;
 import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.event.Listener;
 import org.spongepowered.api.event.Order;

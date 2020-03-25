@@ -1,6 +1,10 @@
-package it.tigierrei.fwparty;
+package it.tigierrei.fwparty.command;
 
+import it.tigierrei.fwparty.FWParty;
 import it.tigierrei.fwparty.exception.InvalidPartyException;
+import it.tigierrei.fwparty.party.Party;
+import it.tigierrei.fwparty.party.PartyManager;
+import org.spongepowered.api.Sponge;
 import org.spongepowered.api.command.CommandResult;
 import org.spongepowered.api.command.args.GenericArguments;
 import org.spongepowered.api.command.spec.CommandSpec;
@@ -16,7 +20,7 @@ public class PartyCommands {
         this.plugin = plugin;
     }
 
-    private CommandSpec invite = CommandSpec.builder()
+    private final CommandSpec invite = CommandSpec.builder()
             .arguments(GenericArguments.onlyOne(GenericArguments.player(Text.of("player"))))
             .executor(((src, args) -> {
                 if (src instanceof Player) {
@@ -40,7 +44,7 @@ public class PartyCommands {
             }))
             .build();
 
-    private CommandSpec accept = CommandSpec.builder()
+    private final CommandSpec accept = CommandSpec.builder()
             .arguments()
             .executor(((src, args) -> {
                 if (src instanceof Player) {
@@ -69,7 +73,7 @@ public class PartyCommands {
             }))
             .build();
 
-    private CommandSpec decline = CommandSpec.builder()
+    private final CommandSpec decline = CommandSpec.builder()
             .arguments()
             .executor(((src, args) -> {
                 if (src instanceof Player) {
@@ -90,7 +94,7 @@ public class PartyCommands {
             .build();
 
 
-    private CommandSpec disband = CommandSpec.builder()
+    private final CommandSpec disband = CommandSpec.builder()
             .arguments()
             .executor(((src, args) -> {
                 if (src instanceof Player) {
@@ -109,7 +113,7 @@ public class PartyCommands {
             }))
             .build();
 
-    private CommandSpec join = CommandSpec.builder()
+    private final CommandSpec join = CommandSpec.builder()
             .arguments(GenericArguments.onlyOne(GenericArguments.player(Text.of("player"))), GenericArguments.onlyOne(GenericArguments.string(Text.of("password"))))
             .executor(((src, args) -> {
                 if (src instanceof Player) {
@@ -148,7 +152,7 @@ public class PartyCommands {
             }))
             .build();
 
-    private CommandSpec createParty = CommandSpec.builder()
+    private final CommandSpec createParty = CommandSpec.builder()
             .arguments(GenericArguments.onlyOne(GenericArguments.string(Text.of("password"))))
             .executor((src, args) -> {
                 if (src instanceof Player) {
@@ -169,7 +173,7 @@ public class PartyCommands {
             })
             .build();
 
-    private CommandSpec setPassword = CommandSpec.builder()
+    private final CommandSpec setPassword = CommandSpec.builder()
             .arguments(GenericArguments.onlyOne(GenericArguments.string(Text.of("password"))))
             .executor((src, args) -> {
                 if (src instanceof Player) {
@@ -195,7 +199,7 @@ public class PartyCommands {
             })
             .build();
 
-    private CommandSpec help = CommandSpec.builder()
+    private final CommandSpec help = CommandSpec.builder()
             .arguments(GenericArguments.onlyOne(GenericArguments.string(Text.of("password"))))
             .executor((src, args) -> {
                 if (src instanceof Player) {
@@ -222,5 +226,9 @@ public class PartyCommands {
             .child(accept, "accept", "accetta")
             .child(decline, "decline", "declina", "rifuta")
             .build();
+
+    public void registerCommands(){
+        Sponge.getCommandManager().register(plugin, help, "party");
+    }
 
 }

@@ -1,9 +1,11 @@
 package it.tigierrei.fwparty;
 
 import com.google.inject.Inject;
+import it.tigierrei.fwparty.command.PartyCommands;
 import it.tigierrei.fwparty.config.ConfigManager;
 import it.tigierrei.fwparty.config.ConfigValues;
 import it.tigierrei.fwparty.listener.PlayerListener;
+import it.tigierrei.fwparty.party.PartyManager;
 import ninja.leaping.configurate.objectmapping.GuiceObjectMapperFactory;
 import org.slf4j.Logger;
 import org.spongepowered.api.Sponge;
@@ -46,6 +48,7 @@ public class FWParty {
         configManager = new ConfigManager(this, configDir);
         loadConfig(configManager, configValues);
         commands = new PartyCommands(this);
+        commands.registerCommands();
         Sponge.getEventManager().registerListeners(this, new PlayerListener(this));
     }
 

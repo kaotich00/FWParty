@@ -1,4 +1,4 @@
-package it.tigierrei.fwparty;
+package it.tigierrei.fwparty.party;
 
 import it.tigierrei.fwparty.exception.InvalidPartyException;
 import org.spongepowered.api.entity.living.player.Player;

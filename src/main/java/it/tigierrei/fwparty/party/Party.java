@@ -1,4 +1,4 @@
-package it.tigierrei.fwparty;
+package it.tigierrei.fwparty.party;
 
 import org.spongepowered.api.entity.living.player.Player;
 
