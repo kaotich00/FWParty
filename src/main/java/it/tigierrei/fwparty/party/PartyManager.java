@@ -44,6 +44,13 @@ public class PartyManager {
         }
     }
 
+    public void removePlayerFromParty(Player player){
+        if(playerMap.containsKey(player)) {
+            Party party = playerMap.remove(player);
+            party.removePlayer(player);
+        }
+    }
+
     public boolean doesPartyExist(Player partyLeader){
         return partyMap.containsKey(partyLeader);
     }
@@ -61,6 +68,10 @@ public class PartyManager {
             Party party = partyMap.remove(partyLeader);
             party.getPlayerList().forEach(playerMap::remove);
         }
+    }
+
+    public Party getPlayerParty(Player player){
+        return playerMap.get(player);
     }
 
     public boolean isPlayerInParty(Player player){

@@ -199,6 +199,54 @@ public class PartyCommands {
             })
             .build();
 
+    private final CommandSpec leave = CommandSpec.builder()
+            .arguments()
+            .executor((src, args) -> {
+                if (src instanceof Player) {
+                    Player player = (Player) src;
+                    PartyManager partyManager = plugin.getPartyManager();
+                    if(partyManager.isPlayerInParty(player)){
+                        if(partyManager.isPartyLeader(player)){
+                            player.sendMessages(Text.of(plugin.getConfigValues().party_leader_left));
+                        }else{
+                            Player partyLeader = partyManager.getPlayerParty(player).getLeader();
+                            partyManager.removePlayerFromParty(player);
+                            partyLeader.sendMessages(TextSerializers.FORMATTING_CODE.deserialize(plugin.getConfigValues().player_left_party.replace("%player%", player.getName())));
+                        }
+                    }else{
+                        player.sendMessages(Text.of(plugin.getConfigValues().not_on_party));
+                    }
+                } else {
+                    src.sendMessage(Text.of("Only players can run that command"));
+                }
+                return CommandResult.success();
+            })
+            .build();
+
+    private final CommandSpec kick = CommandSpec.builder()
+            .arguments(GenericArguments.onlyOne(GenericArguments.player(Text.of("player"))))
+            .executor((src, args) -> {
+                if (src instanceof Player) {
+                    Player player = (Player) src;
+                    Player toBeKicked = args.<Player>getOne("player").orElseThrow(() -> {throw new IllegalArgumentException(plugin.getConfigValues().insufficient_parameters);});
+                    PartyManager partyManager = plugin.getPartyManager();
+                    if(partyManager.isPartyLeader(player)){
+                        if(partyManager.getPlayerParty(player).equals(partyManager.getPlayerParty(toBeKicked))){
+                            partyManager.removePlayerFromParty(toBeKicked, player);
+                            player.sendMessages(TextSerializers.FORMATTING_CODE.deserialize(plugin.getConfigValues().player_kicked.replace("%player%", player.getName())));
+                        }else{
+                            player.sendMessages(TextSerializers.FORMATTING_CODE.deserialize(plugin.getConfigValues().player_not_in_party.replace("%player%", player.getName())));
+                        }
+                    }else{
+                        player.sendMessages(TextSerializers.FORMATTING_CODE.deserialize(plugin.getConfigValues().not_leader.replace("%player%", player.getName())));
+                    }
+                } else {
+                    src.sendMessage(Text.of("Only players can run that command"));
+                }
+                return CommandResult.success();
+            })
+            .build();
+
     private final CommandSpec help = CommandSpec.builder()
             .arguments(GenericArguments.onlyOne(GenericArguments.string(Text.of("password"))))
             .executor((src, args) -> {
@@ -211,7 +259,9 @@ public class PartyCommands {
                                     "/party join <partyLeaderName> <password>\n" +
                                     "/party invite <playerName>\n" +
                                     "/party accept\n" +
-                                    "/party decline\n"
+                                    "/party decline\n" +
+                                    "/party leave\n" +
+                                    "/party kick <player>"
                     ));
                 } else {
                     src.sendMessage(Text.of("Only players can run that command"));
@@ -225,6 +275,8 @@ public class PartyCommands {
             .child(invite, "invite", "add", "aggiungi", "invita")
             .child(accept, "accept", "accetta")
             .child(decline, "decline", "declina", "rifuta")
+            .child(leave,"leave","esci")
+            .child(kick,"kick","rimuovi")
             .build();
 
     public void registerCommands(){

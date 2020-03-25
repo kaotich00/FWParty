@@ -2,6 +2,7 @@ package it.tigierrei.fwparty.config;
 
 import ninja.leaping.configurate.objectmapping.Setting;
 import ninja.leaping.configurate.objectmapping.serialize.ConfigSerializable;
+import org.spongepowered.api.event.Listener;
 
 @ConfigSerializable
 public class ConfigValues {
@@ -35,8 +36,8 @@ public class ConfigValues {
     @Setting(value = "accept-party-notification")
     public String accept_party_notification = "&a%player% è entrato nel party!";
 
-    @Setting(value = "left-party")
-    public String left_party = "&c%player% è uscito dal party!";
+    @Setting(value = "player-left-party")
+    public String player_left_party = "&c%player% è uscito dal party!";
 
     @Setting(value = "not-leader")
     public String not_leader = "&cNon sei ne il leader del party ne Tigierrei!";
@@ -73,4 +74,13 @@ public class ConfigValues {
 
     @Setting(value = "party-created")
     public String party_created = "&cParty creato con successo!";
+
+    @Setting(value = "party-leader-left")
+    public String party_leader_left = "&cSei il leader del party, non puoi uscire! Usa /party disband per cancellare il party!";
+
+    @Setting(value = "player_not_in_party")
+    public String player_not_in_party = "&c%player% non è nel tuo party!";
+
+    @Setting(value = "player_kicked")
+    public String player_kicked = "&c%player% è stato rimosso dal party!";
 }

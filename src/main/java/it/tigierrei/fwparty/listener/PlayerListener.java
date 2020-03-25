@@ -33,8 +33,8 @@ public class PlayerListener {
             Player player = (Player)src.getSource();
             Player target = (Player) event.getTargetEntity();
             PartyManager partyManager = plugin.getPartyManager();
-            Party targetParty = plugin.getPartyManager().getParty(player);
-            Party playerParty = plugin.getPartyManager().getParty(target);
+            Party targetParty = partyManager.getPlayerParty(player);
+            Party playerParty = partyManager.getPlayerParty(target);
             if (targetParty != null && playerParty != null) {
                 if (playerParty.equals(targetParty)) {
                     event.setCancelled(true);
