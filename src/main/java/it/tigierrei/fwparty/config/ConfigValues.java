@@ -15,7 +15,7 @@ public class ConfigValues {
     public String invite_message = "&eHai invitato %player% al tuo party!";
 
     @Setting(value = "invite-received-message")
-    public String invite_received_message = "&eHai ricevuto l'invito ad entrare nel party di %player%! Digita /party accept per accettare!";
+    public String invite_received_message = "&eHai ricevuto l'invito ad entrare nel party di %player%! Digita\n/party accept per accettare\n/party decline per rifiutare";
 
     @Setting(value = "invite-refused")
     public String invite_refused = "&eHai rifiutato l'invito al party di %player%!";

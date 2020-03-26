@@ -106,8 +106,8 @@ public class PartyCommands {
                     Player player = (Player) src;
                     PartyManager partyManager = plugin.getPartyManager();
                     if (partyManager.isPartyLeader(player)) {
+                        partyManager.sendMessageToPartyMembers(player,plugin.getConfigValues().disband_message.replace("%player%",player.getName()));
                         partyManager.deleteParty(player);
-                        player.sendMessages(TextSerializers.FORMATTING_CODE.deserialize(plugin.getConfigValues().disband_message.replace("%player%",player.getName())));
                     } else {
                         player.sendMessages(TextSerializers.FORMATTING_CODE.deserialize(plugin.getConfigValues().error_message));
                     }
@@ -291,9 +291,9 @@ public class PartyCommands {
                     PartyManager partyManager = plugin.getPartyManager();
                     if (partyManager.isPlayerInParty(player) || partyManager.doesPartyExist(player)) {
                         String message = args.<String>getOne("message").orElse("");
-                        partyManager.sendMessageToPartyMembers(partyManager.getPlayerParty(player).getLeader(),"&2[PARTY] &a" + player + ": " + message);
+                        partyManager.sendMessageToPartyMembers(partyManager.getPlayerParty(player).getLeader(),"&2[PARTY] &a" + player.getName() + ": " + message);
                     } else {
-                        player.sendMessages(Text.of(plugin.getConfigValues().not_on_party));
+                        player.sendMessages(TextSerializers.FORMATTING_CODE.deserialize(plugin.getConfigValues().not_on_party));
                     }
                 } else {
                     src.sendMessage(Text.of("Only players can run that command"));
@@ -331,7 +331,7 @@ public class PartyCommands {
                                     "&a/party decline\n" +
                                     "&a/party leave\n" +
                                     "&a/party kick <player>\n" +
-                                    "&a/party chat <message>\n" +
+                                    "&a/party chat <message> oppure /pc <message>\n" +
                                     "&a/party info\n" +
                                     "&a/party credits"
                     ));
@@ -356,6 +356,7 @@ public class PartyCommands {
 
     public void registerCommands() {
         Sponge.getCommandManager().register(plugin, help, "party");
+        Sponge.getCommandManager().register(plugin, chat, "pc");
     }
 
 }
