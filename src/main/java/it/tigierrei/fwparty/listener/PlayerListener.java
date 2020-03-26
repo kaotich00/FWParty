@@ -24,20 +24,27 @@ public class PlayerListener {
     public void onDisconnect(ClientConnectionEvent.Disconnect event, @Root Player p) {
         if(plugin.getPartyManager().isPartyLeader(p)){
             plugin.getPartyManager().deleteParty(p);
+        }else if(plugin.getPartyManager().isPlayerInParty(p)){
+            plugin.getPartyManager().removePlayerFromParty(p);
         }
     }
 
     @Listener(order = Order.FIRST, beforeModifications = true)
     public void onDeath(AttackEntityEvent event, @First EntityDamageSource src) {
+        plugin.getLogger().info("triggered");
         if (event.getTargetEntity() instanceof Player && src.getSource() instanceof Player) {
+            plugin.getLogger().info("cast ok");
             Player player = (Player)src.getSource();
             Player target = (Player) event.getTargetEntity();
             PartyManager partyManager = plugin.getPartyManager();
-            Party targetParty = partyManager.getPlayerParty(player);
-            Party playerParty = partyManager.getPlayerParty(target);
+            Party targetParty = partyManager.getPlayerParty(target);
+            Party playerParty = partyManager.getPlayerParty(player);
             if (targetParty != null && playerParty != null) {
+                plugin.getLogger().info("party not null");
                 if (playerParty.equals(targetParty)) {
                     event.setCancelled(true);
+                }else{
+                    plugin.getLogger().info("different party");
                 }
             }
         }

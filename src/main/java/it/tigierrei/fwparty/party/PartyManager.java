@@ -2,6 +2,9 @@ package it.tigierrei.fwparty.party;
 
 import it.tigierrei.fwparty.exception.InvalidPartyException;
 import org.spongepowered.api.entity.living.player.Player;
+import org.spongepowered.api.text.Text;
+import org.spongepowered.api.text.serializer.TextSerializer;
+import org.spongepowered.api.text.serializer.TextSerializers;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -31,7 +34,9 @@ public class PartyManager {
 
     public void addPlayerToParty(Player playerToAdd, Player partyLeader) throws InvalidPartyException{
         if(partyMap.containsKey(partyLeader)){
-            partyMap.get(partyLeader).addPlayer(playerToAdd);
+            Party party = partyMap.get(partyLeader);
+            party.addPlayer(playerToAdd);
+            playerMap.put(playerToAdd, party);
         }else{
             throw new InvalidPartyException();
         }
@@ -41,6 +46,7 @@ public class PartyManager {
         if(partyMap.containsKey(partyLeader)){
             Party party = partyMap.get(partyLeader);
             party.removePlayer(player);
+            playerMap.remove(player);
         }
     }
 
@@ -48,6 +54,7 @@ public class PartyManager {
         if(playerMap.containsKey(player)) {
             Party party = playerMap.remove(player);
             party.removePlayer(player);
+            playerMap.remove(player);
         }
     }
 
@@ -79,11 +86,27 @@ public class PartyManager {
     }
 
     public void createParty(Player partyLeader, String password){
-        partyMap.put(partyLeader, new Party(partyLeader, password));
+        Party party = new Party(partyLeader, password);
+        partyMap.put(partyLeader, party);
+        playerMap.put(partyLeader, party);
     }
 
     public void createParty(Player partyLeader){
         createParty(partyLeader, null);
     }
 
+    public int getPartySize(Player partyLeader) throws InvalidPartyException {
+        try {
+            return partyMap.get(partyLeader).getPlayersNumber();
+        }catch (Exception e){
+            throw new InvalidPartyException();
+        }
+    }
+
+    public void sendMessageToPartyMembers(Player partyLeader, String message){
+        Text text = TextSerializers.FORMATTING_CODE.deserialize(message);
+        if(partyMap.containsKey(partyLeader)){
+            partyMap.get(partyLeader).getPlayerList().forEach(player -> player.sendMessages(text));
+        }
+    }
 }

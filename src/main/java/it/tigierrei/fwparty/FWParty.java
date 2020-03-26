@@ -10,11 +10,12 @@ import ninja.leaping.configurate.objectmapping.GuiceObjectMapperFactory;
 import org.slf4j.Logger;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.config.ConfigDir;
+import org.spongepowered.api.event.Listener;
 import org.spongepowered.api.event.game.GameReloadEvent;
 import org.spongepowered.api.event.game.state.GameStartedServerEvent;
-import org.spongepowered.api.event.Listener;
 import org.spongepowered.api.plugin.Plugin;
 
+import java.io.File;
 import java.nio.file.Path;
 
 @Plugin(
@@ -33,7 +34,7 @@ public class FWParty {
 
     @Inject
     @ConfigDir(sharedRoot = false)
-    private Path configDir;
+    private File configDir;
 
     @Inject
     private GuiceObjectMapperFactory factory;
@@ -45,8 +46,9 @@ public class FWParty {
 
     @Listener
     public void onServerStart(GameStartedServerEvent event) {
+        partyManager = new PartyManager();
         configManager = new ConfigManager(this, configDir);
-        loadConfig(configManager, configValues);
+        configValues = configManager.loadConfig();
         commands = new PartyCommands(this);
         commands.registerCommands();
         Sponge.getEventManager().registerListeners(this, new PlayerListener(this));
@@ -54,14 +56,14 @@ public class FWParty {
 
     @Listener
     public void onServerReload(GameReloadEvent event){
-        loadConfig(configManager, configValues);
+        configValues = configManager.loadConfig();
     }
 
     public Logger getLogger() {
         return logger;
     }
 
-    public Path getConfigDir() {
+    public File getConfigDir() {
         return configDir;
     }
 
@@ -79,9 +81,5 @@ public class FWParty {
 
     public ConfigValues getConfigValues() {
         return configValues;
-    }
-
-    private void loadConfig(ConfigManager configManager, ConfigValues configValues){
-        configValues = configManager.loadConfig();
     }
 }

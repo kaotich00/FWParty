@@ -10,6 +10,7 @@ import org.spongepowered.api.command.args.GenericArguments;
 import org.spongepowered.api.command.spec.CommandSpec;
 import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.text.Text;
+import org.spongepowered.api.text.format.TextColors;
 import org.spongepowered.api.text.serializer.TextSerializers;
 
 public class PartyCommands {
@@ -54,17 +55,21 @@ public class PartyCommands {
                         if (!partyManager.isPartyLeader(player)) {
                             Player partyLeader = partyManager.removeInvite(player);
                             try {
-                                partyManager.addPlayerToParty(player, partyLeader);
-                                player.sendMessage(TextSerializers.FORMATTING_CODE.deserialize(plugin.getConfigValues().invite_accepted.replace("%player%", partyLeader.getName())));
-                                partyLeader.sendMessage(TextSerializers.FORMATTING_CODE.deserialize(plugin.getConfigValues().accept_party_notification.replace("%player%", player.getName())));
+                                if (partyManager.getPartySize(partyLeader) >= plugin.getConfigValues().party_limit) {
+                                    player.sendMessages(TextSerializers.FORMATTING_CODE.deserialize(plugin.getConfigValues().party_limit_reached));
+                                } else {
+                                    partyManager.addPlayerToParty(player, partyLeader);
+                                    player.sendMessage(TextSerializers.FORMATTING_CODE.deserialize(plugin.getConfigValues().invite_accepted.replace("%player%", partyLeader.getName())));
+                                    partyLeader.sendMessage(TextSerializers.FORMATTING_CODE.deserialize(plugin.getConfigValues().accept_party_notification.replace("%player%", player.getName())));
+                                }
                             } catch (InvalidPartyException e) {
-                                player.sendMessages(Text.of(plugin.getConfigValues().invalid_party));
+                                player.sendMessages(TextSerializers.FORMATTING_CODE.deserialize(plugin.getConfigValues().invalid_party));
                             }
                         } else {
-                            player.sendMessage(Text.of(plugin.getConfigValues().already_in_party));
+                            player.sendMessage(TextSerializers.FORMATTING_CODE.deserialize(plugin.getConfigValues().already_in_party));
                         }
                     } else {
-                        player.sendMessage(Text.of(plugin.getConfigValues().no_invites));
+                        player.sendMessage(TextSerializers.FORMATTING_CODE.deserialize(plugin.getConfigValues().no_invites));
                     }
                 } else {
                     src.sendMessage(Text.of("Only players can run that command"));
@@ -84,7 +89,7 @@ public class PartyCommands {
                         player.sendMessage(TextSerializers.FORMATTING_CODE.deserialize(plugin.getConfigValues().invite_refused.replace("%player%", partyLeader.getName())));
                         partyLeader.sendMessage(TextSerializers.FORMATTING_CODE.deserialize(plugin.getConfigValues().decline_party_notification.replace("%player%", player.getName())));
                     } else {
-                        player.sendMessage(Text.of(plugin.getConfigValues().no_invites));
+                        player.sendMessage(TextSerializers.FORMATTING_CODE.deserialize(plugin.getConfigValues().no_invites));
                     }
                 } else {
                     src.sendMessage(Text.of("Only players can run that command"));
@@ -102,9 +107,9 @@ public class PartyCommands {
                     PartyManager partyManager = plugin.getPartyManager();
                     if (partyManager.isPartyLeader(player)) {
                         partyManager.deleteParty(player);
-                        player.sendMessages(Text.of(plugin.getConfigValues().disband_message));
+                        player.sendMessages(TextSerializers.FORMATTING_CODE.deserialize(plugin.getConfigValues().disband_message.replace("%player%",player.getName())));
                     } else {
-                        player.sendMessages(Text.of(plugin.getConfigValues().error_message));
+                        player.sendMessages(TextSerializers.FORMATTING_CODE.deserialize(plugin.getConfigValues().error_message));
                     }
                 } else {
                     src.sendMessage(Text.of("Only players can run that command"));
@@ -127,23 +132,29 @@ public class PartyCommands {
                             throw new IllegalArgumentException(plugin.getConfigValues().insufficient_parameters);
                         });
                         if (partyManager.isPlayerInParty(player)) {
-                            player.sendMessages(Text.of(plugin.getConfigValues().already_in_party));
-                        } else {
+                            player.sendMessages(TextSerializers.FORMATTING_CODE.deserialize(plugin.getConfigValues().already_in_party));
+                        } else if(partyManager.doesPartyExist(partyLeader)){
                             Party party = partyManager.getParty(partyLeader);
                             if (party.getPassword().equals(password)) {
                                 try {
-                                    partyManager.addPlayerToParty(player, partyLeader);
-                                    player.sendMessage(TextSerializers.FORMATTING_CODE.deserialize(plugin.getConfigValues().invite_accepted.replace("%player%", partyLeader.getName())));
-                                    partyLeader.sendMessage(TextSerializers.FORMATTING_CODE.deserialize(plugin.getConfigValues().accept_party_notification.replace("%player%", player.getName())));
+                                    if (partyManager.getPartySize(partyLeader) >= plugin.getConfigValues().party_limit) {
+                                        player.sendMessages(TextSerializers.FORMATTING_CODE.deserialize(plugin.getConfigValues().party_limit_reached));
+                                    } else {
+                                        partyManager.addPlayerToParty(player, partyLeader);
+                                        player.sendMessage(TextSerializers.FORMATTING_CODE.deserialize(plugin.getConfigValues().invite_accepted.replace("%player%", partyLeader.getName())));
+                                        partyLeader.sendMessage(TextSerializers.FORMATTING_CODE.deserialize(plugin.getConfigValues().accept_party_notification.replace("%player%", player.getName())));
+                                    }
                                 } catch (InvalidPartyException e) {
-                                    player.sendMessages(Text.of(plugin.getConfigValues().invalid_party));
+                                    player.sendMessages(TextSerializers.FORMATTING_CODE.deserialize(plugin.getConfigValues().invalid_party));
                                 }
                             } else {
-                                player.sendMessages(Text.of(plugin.getConfigValues().wrong_password));
+                                player.sendMessages(TextSerializers.FORMATTING_CODE.deserialize(plugin.getConfigValues().wrong_password));
                             }
+                        }else{
+                            player.sendMessages(TextSerializers.FORMATTING_CODE.deserialize(plugin.getConfigValues().invalid_party));
                         }
                     } catch (IllegalArgumentException e) {
-                        player.sendMessages(Text.of(e.getMessage()));
+                        player.sendMessages(TextSerializers.FORMATTING_CODE.deserialize(e.getMessage()));
                     }
                 } else {
                     src.sendMessage(Text.of("Only players can run that command"));
@@ -161,10 +172,10 @@ public class PartyCommands {
                     PartyManager partyManager = plugin.getPartyManager();
                     //TODO Il secondo controllo e' ridondante ma lo lascio per chiarezza
                     if (partyManager.isPlayerInParty(player) || partyManager.doesPartyExist(player)) {
-                        player.sendMessages(Text.of(plugin.getConfigValues().already_in_party));
+                        player.sendMessages(TextSerializers.FORMATTING_CODE.deserialize(plugin.getConfigValues().already_in_party));
                     } else {
                         partyManager.createParty(player, password);
-                        player.sendMessages(Text.of(plugin.getConfigValues().party_created));
+                        player.sendMessages(TextSerializers.FORMATTING_CODE.deserialize(plugin.getConfigValues().party_created));
                     }
                 } else {
                     src.sendMessage(Text.of("Only players can run that command"));
@@ -185,12 +196,12 @@ public class PartyCommands {
                         PartyManager partyManager = plugin.getPartyManager();
                         if (partyManager.isPartyLeader(player)) {
                             partyManager.getParty(player).setPassword(password);
-                            player.sendMessages(Text.of(plugin.getConfigValues().password_changed));
+                            player.sendMessages(TextSerializers.FORMATTING_CODE.deserialize(plugin.getConfigValues().password_changed));
                         } else {
-                            player.sendMessages(Text.of(plugin.getConfigValues().error_message));
+                            player.sendMessages(TextSerializers.FORMATTING_CODE.deserialize(plugin.getConfigValues().error_message));
                         }
                     } catch (IllegalArgumentException e) {
-                        player.sendMessages(Text.of(e.getMessage()));
+                        player.sendMessages(TextSerializers.FORMATTING_CODE.deserialize(e.getMessage()));
                     }
                 } else {
                     src.sendMessage(Text.of("Only players can run that command"));
@@ -205,16 +216,17 @@ public class PartyCommands {
                 if (src instanceof Player) {
                     Player player = (Player) src;
                     PartyManager partyManager = plugin.getPartyManager();
-                    if(partyManager.isPlayerInParty(player)){
-                        if(partyManager.isPartyLeader(player)){
-                            player.sendMessages(Text.of(plugin.getConfigValues().party_leader_left));
-                        }else{
+                    if (partyManager.isPlayerInParty(player)) {
+                        if (partyManager.isPartyLeader(player)) {
+                            player.sendMessages(TextSerializers.FORMATTING_CODE.deserialize(plugin.getConfigValues().party_leader_left));
+                        } else {
                             Player partyLeader = partyManager.getPlayerParty(player).getLeader();
                             partyManager.removePlayerFromParty(player);
                             partyLeader.sendMessages(TextSerializers.FORMATTING_CODE.deserialize(plugin.getConfigValues().player_left_party.replace("%player%", player.getName())));
+                            player.sendMessages(TextSerializers.FORMATTING_CODE.deserialize(plugin.getConfigValues().player_left));
                         }
-                    }else{
-                        player.sendMessages(Text.of(plugin.getConfigValues().not_on_party));
+                    } else {
+                        player.sendMessages(TextSerializers.FORMATTING_CODE.deserialize(plugin.getConfigValues().not_on_party));
                     }
                 } else {
                     src.sendMessage(Text.of("Only players can run that command"));
@@ -228,16 +240,23 @@ public class PartyCommands {
             .executor((src, args) -> {
                 if (src instanceof Player) {
                     Player player = (Player) src;
-                    Player toBeKicked = args.<Player>getOne("player").orElseThrow(() -> {throw new IllegalArgumentException(plugin.getConfigValues().insufficient_parameters);});
+                    Player toBeKicked = args.<Player>getOne("player").orElseThrow(() -> {
+                        throw new IllegalArgumentException(plugin.getConfigValues().insufficient_parameters);
+                    });
                     PartyManager partyManager = plugin.getPartyManager();
-                    if(partyManager.isPartyLeader(player)){
-                        if(partyManager.getPlayerParty(player).equals(partyManager.getPlayerParty(toBeKicked))){
-                            partyManager.removePlayerFromParty(toBeKicked, player);
-                            player.sendMessages(TextSerializers.FORMATTING_CODE.deserialize(plugin.getConfigValues().player_kicked.replace("%player%", player.getName())));
-                        }else{
-                            player.sendMessages(TextSerializers.FORMATTING_CODE.deserialize(plugin.getConfigValues().player_not_in_party.replace("%player%", player.getName())));
+                    if (partyManager.isPartyLeader(player)) {
+                        if (partyManager.getPlayerParty(player).equals(partyManager.getPlayerParty(toBeKicked))) {
+                            if (partyManager.isPartyLeader(toBeKicked)) {
+                                player.sendMessages(TextSerializers.FORMATTING_CODE.deserialize(plugin.getConfigValues().party_leader_left));
+                            } else {
+                                partyManager.removePlayerFromParty(toBeKicked, player);
+                                partyManager.sendMessageToPartyMembers(player, plugin.getConfigValues().player_kicked.replace("%player%", toBeKicked.getName()));
+                                toBeKicked.sendMessages(TextSerializers.FORMATTING_CODE.deserialize(plugin.getConfigValues().kicked));
+                            }
+                        } else {
+                            player.sendMessages(TextSerializers.FORMATTING_CODE.deserialize(plugin.getConfigValues().player_not_in_party.replace("%player%", toBeKicked.getName())));
                         }
-                    }else{
+                    } else {
                         player.sendMessages(TextSerializers.FORMATTING_CODE.deserialize(plugin.getConfigValues().not_leader.replace("%player%", player.getName())));
                     }
                 } else {
@@ -247,21 +266,74 @@ public class PartyCommands {
             })
             .build();
 
-    private final CommandSpec help = CommandSpec.builder()
-            .arguments(GenericArguments.onlyOne(GenericArguments.string(Text.of("password"))))
+    private final CommandSpec info = CommandSpec.builder()
             .executor((src, args) -> {
                 if (src instanceof Player) {
-                    src.sendMessage(Text.of(
-                            "-------{ FWParty }-------\n" +
-                                    "/party create <password>\n" +
-                                    "/party disband\n" +
-                                    "/party setPassword <password>\n" +
-                                    "/party join <partyLeaderName> <password>\n" +
-                                    "/party invite <playerName>\n" +
-                                    "/party accept\n" +
-                                    "/party decline\n" +
-                                    "/party leave\n" +
-                                    "/party kick <player>"
+                    PartyManager partyManager = plugin.getPartyManager();
+                    Player player = (Player)src;
+                    if(partyManager.isPlayerInParty(player)){
+                        player.sendMessages(TextSerializers.FORMATTING_CODE.deserialize(partyManager.getPlayerParty(player).getPartyInfo()));
+                    }else{
+                        player.sendMessages(TextSerializers.FORMATTING_CODE.deserialize(plugin.getConfigValues().not_on_party));
+                    }
+                } else {
+                    src.sendMessage(Text.of("Only players can run that command"));
+                }
+                return CommandResult.success();
+            })
+            .build();
+
+    private final CommandSpec chat = CommandSpec.builder()
+            .arguments(GenericArguments.remainingJoinedStrings(Text.of("message")))
+            .executor((src, args) -> {
+                if (src instanceof Player) {
+                    Player player = (Player) src;
+                    PartyManager partyManager = plugin.getPartyManager();
+                    if (partyManager.isPlayerInParty(player) || partyManager.doesPartyExist(player)) {
+                        String message = args.<String>getOne("message").orElse("");
+                        partyManager.sendMessageToPartyMembers(partyManager.getPlayerParty(player).getLeader(),"&2[PARTY] &a" + player + ": " + message);
+                    } else {
+                        player.sendMessages(Text.of(plugin.getConfigValues().not_on_party));
+                    }
+                } else {
+                    src.sendMessage(Text.of("Only players can run that command"));
+                }
+
+                return CommandResult.success();
+            })
+            .build();
+
+    private final CommandSpec credits = CommandSpec.builder()
+            .executor((src, args) -> {
+                if (src instanceof Player) {
+                    src.sendMessage(TextSerializers.FORMATTING_CODE.deserialize(
+                            "&aParty system made by &6Tigierrei\n" +
+                                    "&aChat system made by &6Markus27"
+                    ));
+                } else {
+                    src.sendMessage(Text.of("Only players can run that command"));
+                }
+                return CommandResult.success();
+            })
+            .build();
+
+    private final CommandSpec help = CommandSpec.builder()
+            .executor((src, args) -> {
+                if (src instanceof Player) {
+                    src.sendMessage(TextSerializers.FORMATTING_CODE.deserialize(
+                            "&6-------{ FWParty }-------\n" +
+                                    "&a/party create <password>\n" +
+                                    "&a/party disband\n" +
+                                    "&a/party setPassword <password>\n" +
+                                    "&a/party join <partyLeaderName> <password>\n" +
+                                    "&a/party invite <playerName>\n" +
+                                    "&a/party accept\n" +
+                                    "&a/party decline\n" +
+                                    "&a/party leave\n" +
+                                    "&a/party kick <player>\n" +
+                                    "&a/party chat <message>\n" +
+                                    "&a/party info\n" +
+                                    "&a/party credits"
                     ));
                 } else {
                     src.sendMessage(Text.of("Only players can run that command"));
@@ -275,11 +347,14 @@ public class PartyCommands {
             .child(invite, "invite", "add", "aggiungi", "invita")
             .child(accept, "accept", "accetta")
             .child(decline, "decline", "declina", "rifuta")
-            .child(leave,"leave","esci")
-            .child(kick,"kick","rimuovi")
+            .child(leave, "leave", "esci")
+            .child(kick, "kick", "rimuovi")
+            .child(info,"info")
+            .child(chat,"chat", "c")
+            .child(credits, "credits", "crediti")
             .build();
 
-    public void registerCommands(){
+    public void registerCommands() {
         Sponge.getCommandManager().register(plugin, help, "party");
     }
 

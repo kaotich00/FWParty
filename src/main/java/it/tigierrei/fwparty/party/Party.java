@@ -61,4 +61,16 @@ public class Party {
     public int hashCode() {
         return Objects.hash(leader);
     }
+
+    public int getPlayersNumber(){
+        return playerList.size();
+    }
+
+    public String getPartyInfo(){
+        StringBuilder stringBuilder = new StringBuilder()
+                .append("&6Party leader: &a" + getLeader().getName() + "\n")
+                .append("&6Members list: &a");
+        playerList.forEach(player -> stringBuilder.append(player.getName() + "\n"));
+        return stringBuilder.toString();
+    }
 }
