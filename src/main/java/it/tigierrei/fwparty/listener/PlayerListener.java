@@ -22,10 +22,10 @@ public class PlayerListener {
 
     @Listener(order = Order.FIRST, beforeModifications = true)
     public void onDisconnect(ClientConnectionEvent.Disconnect event, @Root Player p) {
-        if(plugin.getPartyManager().isPartyLeader(p)){
-            plugin.getPartyManager().deleteParty(p);
-        }else if(plugin.getPartyManager().isPlayerInParty(p)){
-            plugin.getPartyManager().removePlayerFromParty(p);
+        if(plugin.getPartyManager().isPartyLeader(p.getUniqueId())){
+            plugin.getPartyManager().deleteParty(p.getUniqueId());
+        }else if(plugin.getPartyManager().isPlayerInParty(p.getUniqueId())){
+            plugin.getPartyManager().removePlayerFromParty(p.getUniqueId());
         }
     }
 
@@ -37,8 +37,8 @@ public class PlayerListener {
             Player player = (Player)src.getSource();
             Player target = (Player) event.getTargetEntity();
             PartyManager partyManager = plugin.getPartyManager();
-            Party targetParty = partyManager.getPlayerParty(target);
-            Party playerParty = partyManager.getPlayerParty(player);
+            Party targetParty = partyManager.getPlayerParty(target.getUniqueId());
+            Party playerParty = partyManager.getPlayerParty(player.getUniqueId());
             if (targetParty != null && playerParty != null) {
                 plugin.getLogger().info("party not null");
                 if (playerParty.equals(targetParty)) {

@@ -1,25 +1,25 @@
 package it.tigierrei.fwparty.party;
 
 import it.tigierrei.fwparty.exception.InvalidPartyException;
-import org.spongepowered.api.entity.living.player.Player;
+import org.spongepowered.api.Sponge;
 import org.spongepowered.api.text.Text;
-import org.spongepowered.api.text.serializer.TextSerializer;
 import org.spongepowered.api.text.serializer.TextSerializers;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.UUID;
 
 public class PartyManager {
 
-    private final Map<Player, Player> inviteMap = new HashMap<>();
-    private final Map<Player, Party> partyMap = new HashMap<>();
-    private final Map<Player, Party> playerMap = new HashMap<>();
+    private final Map<UUID, UUID> inviteMap = new HashMap<>();
+    private final Map<UUID, Party> partyMap = new HashMap<>();
+    private final Map<UUID, Party> playerMap = new HashMap<>();
 
-    public void addInvite(Player playerInvited, Player partyToJoin){
+    public void addInvite(UUID playerInvited, UUID partyToJoin){
         inviteMap.put(playerInvited, partyToJoin);
     }
 
-    public boolean hasPendingInvite(Player player){
+    public boolean hasPendingInvite(UUID player){
         return inviteMap.containsKey(player);
     }
 
@@ -28,11 +28,11 @@ public class PartyManager {
      * @param playerInvited
      * @return Party leader
      */
-    public Player removeInvite(Player playerInvited){
+    public UUID removeInvite(UUID playerInvited){
         return inviteMap.remove(playerInvited);
     }
 
-    public void addPlayerToParty(Player playerToAdd, Player partyLeader) throws InvalidPartyException{
+    public void addPlayerToParty(UUID playerToAdd, UUID partyLeader) throws InvalidPartyException{
         if(partyMap.containsKey(partyLeader)){
             Party party = partyMap.get(partyLeader);
             party.addPlayer(playerToAdd);
@@ -42,7 +42,7 @@ public class PartyManager {
         }
     }
 
-    public void removePlayerFromParty(Player player, Player partyLeader){
+    public void removePlayerFromParty(UUID player, UUID partyLeader){
         if(partyMap.containsKey(partyLeader)){
             Party party = partyMap.get(partyLeader);
             party.removePlayer(player);
@@ -50,7 +50,7 @@ public class PartyManager {
         }
     }
 
-    public void removePlayerFromParty(Player player){
+    public void removePlayerFromParty(UUID player){
         if(playerMap.containsKey(player)) {
             Party party = playerMap.remove(player);
             party.removePlayer(player);
@@ -58,44 +58,44 @@ public class PartyManager {
         }
     }
 
-    public boolean doesPartyExist(Player partyLeader){
+    public boolean doesPartyExist(UUID partyLeader){
         return partyMap.containsKey(partyLeader);
     }
 
-    public boolean isPartyLeader(Player partyLeader){
+    public boolean isPartyLeader(UUID partyLeader){
         return doesPartyExist(partyLeader);
     }
 
-    public Party getParty(Player partyLeader){
+    public Party getParty(UUID partyLeader){
         return partyMap.get(partyLeader);
     }
 
-    public void deleteParty(Player partyLeader){
+    public void deleteParty(UUID partyLeader){
         if(partyMap.containsKey(partyLeader)){
             Party party = partyMap.remove(partyLeader);
             party.getPlayerList().forEach(playerMap::remove);
         }
     }
 
-    public Party getPlayerParty(Player player){
+    public Party getPlayerParty(UUID player){
         return playerMap.get(player);
     }
 
-    public boolean isPlayerInParty(Player player){
+    public boolean isPlayerInParty(UUID player){
         return playerMap.containsKey(player);
     }
 
-    public void createParty(Player partyLeader, String password){
+    public void createParty(UUID partyLeader, String password){
         Party party = new Party(partyLeader, password);
         partyMap.put(partyLeader, party);
         playerMap.put(partyLeader, party);
     }
 
-    public void createParty(Player partyLeader){
+    public void createParty(UUID partyLeader){
         createParty(partyLeader, null);
     }
 
-    public int getPartySize(Player partyLeader) throws InvalidPartyException {
+    public int getPartySize(UUID partyLeader) throws InvalidPartyException {
         try {
             return partyMap.get(partyLeader).getPlayersNumber();
         }catch (Exception e){
@@ -103,10 +103,10 @@ public class PartyManager {
         }
     }
 
-    public void sendMessageToPartyMembers(Player partyLeader, String message){
+    public void sendMessageToPartyMembers(UUID partyLeader, String message){
         Text text = TextSerializers.FORMATTING_CODE.deserialize(message);
         if(partyMap.containsKey(partyLeader)){
-            partyMap.get(partyLeader).getPlayerList().forEach(player -> player.sendMessages(text));
+            partyMap.get(partyLeader).getPlayerList().forEach(player -> Sponge.getServer().getPlayer(player).get().sendMessages(text));
         }
     }
 }
