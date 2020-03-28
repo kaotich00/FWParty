@@ -2,6 +2,7 @@ package it.tigierrei.fwparty.party;
 
 import it.tigierrei.fwparty.exception.InvalidPartyException;
 import org.spongepowered.api.Sponge;
+import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.text.Text;
 import org.spongepowered.api.text.serializer.TextSerializers;
 
@@ -108,5 +109,16 @@ public class PartyManager {
         if(partyMap.containsKey(partyLeader)){
             partyMap.get(partyLeader).getPlayerList().forEach(player -> Sponge.getServer().getPlayer(player).get().sendMessages(text));
         }
+    }
+
+    public boolean areInSameParty(Player player1, Player player2){
+        Party targetParty = getPlayerParty(player1.getUniqueId());
+        Party playerParty = getPlayerParty(player2.getUniqueId());
+        if (targetParty != null && playerParty != null) {
+            if (playerParty.equals(targetParty)) {
+                return true;
+            }
+        }
+        return false;
     }
 }

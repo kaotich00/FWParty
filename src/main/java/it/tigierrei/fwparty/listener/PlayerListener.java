@@ -4,13 +4,18 @@ import it.tigierrei.fwparty.FWParty;
 import it.tigierrei.fwparty.party.Party;
 import it.tigierrei.fwparty.party.PartyManager;
 import org.spongepowered.api.entity.living.player.Player;
+import org.spongepowered.api.entity.projectile.Projectile;
+import org.spongepowered.api.entity.projectile.source.ProjectileSource;
 import org.spongepowered.api.event.Listener;
 import org.spongepowered.api.event.Order;
 import org.spongepowered.api.event.cause.entity.damage.source.EntityDamageSource;
 import org.spongepowered.api.event.entity.AttackEntityEvent;
+import org.spongepowered.api.event.entity.TargetEntityEvent;
 import org.spongepowered.api.event.filter.cause.First;
 import org.spongepowered.api.event.filter.cause.Root;
 import org.spongepowered.api.event.network.ClientConnectionEvent;
+
+import java.util.UUID;
 
 public class PlayerListener {
 
@@ -31,20 +36,19 @@ public class PlayerListener {
 
     @Listener(order = Order.FIRST, beforeModifications = true)
     public void onDeath(AttackEntityEvent event, @First EntityDamageSource src) {
-        plugin.getLogger().info("triggered");
         if (event.getTargetEntity() instanceof Player && src.getSource() instanceof Player) {
-            plugin.getLogger().info("cast ok");
             Player player = (Player)src.getSource();
             Player target = (Player) event.getTargetEntity();
-            PartyManager partyManager = plugin.getPartyManager();
-            Party targetParty = partyManager.getPlayerParty(target.getUniqueId());
-            Party playerParty = partyManager.getPlayerParty(player.getUniqueId());
-            if (targetParty != null && playerParty != null) {
-                plugin.getLogger().info("party not null");
-                if (playerParty.equals(targetParty)) {
+            if(plugin.getPartyManager().areInSameParty(player, target)){
+                event.setCancelled(true);
+            }
+        }else if(event.getTargetEntity() instanceof Player && src.getSource() instanceof Projectile){
+            ProjectileSource projectileSource = ((Projectile) src.getSource()).getShooter();
+            if(projectileSource instanceof Player){
+                Player damager = (Player) projectileSource;
+                Player target = (Player)event.getTargetEntity();
+                if(plugin.getPartyManager().areInSameParty(damager, target)){
                     event.setCancelled(true);
-                }else{
-                    plugin.getLogger().info("different party");
                 }
             }
         }
