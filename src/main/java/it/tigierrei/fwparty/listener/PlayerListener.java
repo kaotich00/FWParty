@@ -1,8 +1,6 @@
 package it.tigierrei.fwparty.listener;
 
 import it.tigierrei.fwparty.FWParty;
-import it.tigierrei.fwparty.party.Party;
-import it.tigierrei.fwparty.party.PartyManager;
 import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.entity.projectile.Projectile;
 import org.spongepowered.api.entity.projectile.source.ProjectileSource;
@@ -10,12 +8,9 @@ import org.spongepowered.api.event.Listener;
 import org.spongepowered.api.event.Order;
 import org.spongepowered.api.event.cause.entity.damage.source.EntityDamageSource;
 import org.spongepowered.api.event.entity.AttackEntityEvent;
-import org.spongepowered.api.event.entity.TargetEntityEvent;
 import org.spongepowered.api.event.filter.cause.First;
 import org.spongepowered.api.event.filter.cause.Root;
 import org.spongepowered.api.event.network.ClientConnectionEvent;
-
-import java.util.UUID;
 
 public class PlayerListener {
 

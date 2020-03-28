@@ -115,9 +115,7 @@ public class PartyManager {
         Party targetParty = getPlayerParty(player1.getUniqueId());
         Party playerParty = getPlayerParty(player2.getUniqueId());
         if (targetParty != null && playerParty != null) {
-            if (playerParty.equals(targetParty)) {
-                return true;
-            }
+            return playerParty.equals(targetParty);
         }
         return false;
     }
