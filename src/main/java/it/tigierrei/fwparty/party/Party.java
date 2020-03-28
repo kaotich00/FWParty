@@ -1,43 +1,43 @@
 package it.tigierrei.fwparty.party;
 
-import org.spongepowered.api.entity.living.player.Player;
+import org.spongepowered.api.Sponge;
 
 import java.util.*;
 
 public class Party {
 
-    private Player leader;
+    private UUID leader;
     private String password;
-    private final Set<Player> playerList;
+    private final Set<UUID> playerList;
 
-    public Party(Player leader, String password) {
+    public Party(UUID leader, String password) {
         this.leader = leader;
         this.password = password;
         this.playerList = new HashSet<>();
         playerList.add(leader);
     }
 
-    public Party(Player leader) {
+    public Party(UUID leader) {
         this(leader, null);
     }
 
-    public void addPlayer(Player player){
+    public void addPlayer(UUID player){
         playerList.add(player);
     }
 
-    public void removePlayer(Player player){
+    public void removePlayer(UUID player){
         playerList.remove(player);
     }
 
-    public Set<Player> getPlayerList() {
+    public Set<UUID> getPlayerList() {
         return Collections.unmodifiableSet(playerList);
     }
 
-    public Player getLeader() {
+    public UUID getLeader() {
         return leader;
     }
 
-    public void setLeader(Player leader) {
+    public void setLeader(UUID leader) {
         this.leader = leader;
     }
 
@@ -60,5 +60,17 @@ public class Party {
     @Override
     public int hashCode() {
         return Objects.hash(leader);
+    }
+
+    public int getPlayersNumber(){
+        return playerList.size();
+    }
+
+    public String getPartyInfo(){
+        StringBuilder stringBuilder = new StringBuilder()
+                .append("&6Party leader: &a" + Sponge.getServer().getPlayer(getLeader()).get().getName() + "\n")
+                .append("&6Members list: &a");
+        playerList.forEach(player -> stringBuilder.append(Sponge.getServer().getPlayer(player).get().getName() + "\n"));
+        return stringBuilder.toString();
     }
 }

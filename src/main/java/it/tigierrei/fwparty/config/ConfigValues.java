@@ -2,42 +2,41 @@ package it.tigierrei.fwparty.config;
 
 import ninja.leaping.configurate.objectmapping.Setting;
 import ninja.leaping.configurate.objectmapping.serialize.ConfigSerializable;
-import org.spongepowered.api.event.Listener;
 
 @ConfigSerializable
 public class ConfigValues {
     @Setting(value = "party-limit", comment = "Massimo numero di giocatori per party")
     public int party_limit = 50;
 
+    @Setting(value = "party-limit-reached", comment = "Massimo numero di giocatori per party")
+    public String party_limit_reached = "&cIl limite del party e' stato raggiunto!";
+
     @Setting(value = "invite-message")
-    public String invite_message = "&aHai invitato %player% al tuo party!";
+    public String invite_message = "&eHai invitato %player% al tuo party!";
 
     @Setting(value = "invite-received-message")
-    public String invite_received_message = "&aHai ricevuto l'invito ad entrare nel party di %player%! Digita /party accept per accettare!";
+    public String invite_received_message = "&eHai ricevuto l'invito ad entrare nel party di %player%! Digita\n/party accept per accettare\n/party decline per rifiutare";
 
     @Setting(value = "invite-refused")
-    public String invite_refused = "&aHai rifiutato l'invito al party di %player%!";
+    public String invite_refused = "&eHai rifiutato l'invito al party di %player%!";
 
     @Setting(value = "declined-party-notification")
-    public String decline_party_notification = "&a%player% ha rifiutato l'invito al party!";
-
-    @Setting(value = "declined-party-leader")
-    public String declined_party_leader = "&c%player% ha rifiutato l'invito al party!";
+    public String decline_party_notification = "&e%player% ha rifiutato l'invito al party!";
 
     @Setting(value = "disband-message")
-    public String disband_message = "&c Il party di %player% è stato cancellato!";
-
-    @Setting(value = "party-full")
-    public String party_full = "&cQuesto party è pieno!";
+    public String disband_message = "&cIl party di %player% e' stato cancellato!";
 
     @Setting(value = "invite-accepted")
-    public String invite_accepted = "&Sei entrato nel party di %player%!";
+    public String invite_accepted = "&aSei entrato nel party di %player%!";
 
     @Setting(value = "accept-party-notification")
-    public String accept_party_notification = "&a%player% è entrato nel party!";
+    public String accept_party_notification = "&a%player% e' entrato nel party!";
 
     @Setting(value = "player-left-party")
-    public String player_left_party = "&c%player% è uscito dal party!";
+    public String player_left_party = "&c%player% e' uscito dal party!";
+
+    @Setting(value = "player-left")
+    public String player_left = "&eSei uscito dal party!";
 
     @Setting(value = "not-leader")
     public String not_leader = "&cNon sei ne il leader del party ne Tigierrei!";
@@ -52,10 +51,10 @@ public class ConfigValues {
     public String no_invites = "&cNon hai nessun invito in sospeso!";
 
     @Setting(value = "already-in-party")
-    public String already_in_party = "&cSei già in un party!";
+    public String already_in_party = "&cSei gia' in un party!";
 
     @Setting(value = "player-already-in-party")
-    public String player_already_in_party = "&c%player% è già in un party!";
+    public String player_already_in_party = "&c%player% e' già in un party!";
 
     @Setting(value = "error-message")
     public String error_message = "&cNon sei in un party oppure non sei il party leader!";
@@ -64,23 +63,26 @@ public class ConfigValues {
     public String insufficient_parameters = "&cParametri insufficienti!";
 
     @Setting(value = "wrong-password")
-    public String wrong_password = "&cWrong password!";
+    public String wrong_password = "&cPassword sbagliata!";
 
     @Setting(value = "password-changed")
-    public String password_changed = "&cPassword modificata!";
+    public String password_changed = "&aPassword modificata!";
 
     @Setting(value = "invalid-party")
-    public String invalid_party = "&cIl party a cui stai tentando di accedere non esiste più!";
+    public String invalid_party = "&cIl party a cui stai tentando di accedere non esiste piu'!";
 
     @Setting(value = "party-created")
-    public String party_created = "&cParty creato con successo!";
+    public String party_created = "&aParty creato con successo!";
 
     @Setting(value = "party-leader-left")
     public String party_leader_left = "&cSei il leader del party, non puoi uscire! Usa /party disband per cancellare il party!";
 
     @Setting(value = "player_not_in_party")
-    public String player_not_in_party = "&c%player% non è nel tuo party!";
+    public String player_not_in_party = "&c%player% non e' nel tuo party!";
 
     @Setting(value = "player_kicked")
-    public String player_kicked = "&c%player% è stato rimosso dal party!";
+    public String player_kicked = "&e%player% e' stato rimosso dal party!";
+
+    @Setting(value = "kicked")
+    public String kicked = "&cSei stato rimosso dal party!";
 }
