@@ -128,7 +128,7 @@ public class PartyManager implements Serializable {
         }
         return false;
     }
-    
+
     /**
      * Adding a player UUID to a list of players who have activated party chat.
      * @param player
