@@ -68,9 +68,13 @@ public class Party {
 
     public String getPartyInfo(){
         StringBuilder stringBuilder = new StringBuilder()
-                .append("&6Party leader: &a" + Sponge.getServer().getPlayer(getLeader()).get().getName() + "\n")
-                .append("&6Members list: &a");
-        playerList.forEach(player -> stringBuilder.append(Sponge.getServer().getPlayer(player).get().getName() + "\n"));
+                .append("&6Party leader: &a")
+                .append(Sponge.getServer().getPlayer(getLeader()).get().getName())
+                .append("\n")
+                .append("&6Members list: &a\n");
+        for(UUID player : playerList){
+            stringBuilder.append(Sponge.getServer().getPlayer(player).get().getName()).append("\n");
+        }
         return stringBuilder.toString();
     }
 }

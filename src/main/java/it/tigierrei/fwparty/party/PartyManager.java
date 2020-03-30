@@ -107,7 +107,9 @@ public class PartyManager {
     public void sendMessageToPartyMembers(UUID partyLeader, String message){
         Text text = TextSerializers.FORMATTING_CODE.deserialize(message);
         if(partyMap.containsKey(partyLeader)){
-            partyMap.get(partyLeader).getPlayerList().forEach(player -> Sponge.getServer().getPlayer(player).get().sendMessages(text));
+            for(UUID player : partyMap.get(partyLeader).getPlayerList()){
+                Sponge.getServer().getPlayer(player).get().sendMessages(text);
+            }
         }
     }
 

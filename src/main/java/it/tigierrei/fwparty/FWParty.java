@@ -24,7 +24,8 @@ import java.nio.file.Path;
         description = "A simple party plugin made by Tigierrei for ForgottenWorld",
         url = "https://forgottenworld.it",
         authors = {
-                "Tigierrei"
+                "Tigierrei",
+                "Markus_27"
         }
 )
 public class FWParty {

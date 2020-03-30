@@ -5,6 +5,9 @@ import ninja.leaping.configurate.objectmapping.serialize.ConfigSerializable;
 
 @ConfigSerializable
 public class ConfigValues {
+    @Setting(value = "party-limit", comment = "Durata combat log in secondi")
+    public int combat_time = 15;
+
     @Setting(value = "party-limit", comment = "Massimo numero di giocatori per party")
     public int party_limit = 50;
 
