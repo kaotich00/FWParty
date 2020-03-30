@@ -14,6 +14,7 @@ import org.spongepowered.api.event.cause.entity.damage.source.EntityDamageSource
 import org.spongepowered.api.event.cause.entity.damage.source.IndirectEntityDamageSource;
 import org.spongepowered.api.event.entity.ChangeEntityPotionEffectEvent;
 import org.spongepowered.api.event.entity.DamageEntityEvent;
+import org.spongepowered.api.event.filter.cause.Root;
 import org.spongepowered.api.event.message.MessageChannelEvent;
 
 public class PlayerListener {
@@ -70,13 +71,12 @@ public class PlayerListener {
     }
 
     @Listener(order = Order.FIRST, beforeModifications = true)
-    public void onPlayerChat(MessageChannelEvent.Chat event) {
-    	String message = event.getRawMessage().toPlain();
-    	Player player = (Player) event.getSource();
-    	PartyManager partyManager = plugin.getPartyManager();
-    	if (partyManager.isPlayerChatting(player.getUniqueId())) {
-    		event.setCancelled(true);
-    		partyManager.sendMessageToPartyMembers(partyManager.getPlayerParty(player.getUniqueId()).getLeader(),"&2[PARTY] &a" + player.getName() + ": " + message);
-    	}
+    public void onPlayerChat(MessageChannelEvent.Chat event, @Root Player player) {
+        String message = event.getRawMessage().toPlain();
+        PartyManager partyManager = plugin.getPartyManager();
+        if (partyManager.isPlayerChatting(player.getUniqueId())) {
+            event.setCancelled(true);
+            partyManager.sendMessageToPartyMembers(partyManager.getPlayerParty(player.getUniqueId()).getLeader(),"&2[PARTY] &a" + player.getName() + ": " + message);
+        }
     }
 }
