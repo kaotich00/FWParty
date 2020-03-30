@@ -2,9 +2,10 @@ package it.tigierrei.fwparty.party;
 
 import org.spongepowered.api.Sponge;
 
+import java.io.Serializable;
 import java.util.*;
 
-public class Party {
+public class Party implements Serializable {
 
     private UUID leader;
     private String password;

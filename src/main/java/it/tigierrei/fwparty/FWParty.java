@@ -13,6 +13,7 @@ import org.spongepowered.api.config.ConfigDir;
 import org.spongepowered.api.event.Listener;
 import org.spongepowered.api.event.game.GameReloadEvent;
 import org.spongepowered.api.event.game.state.GameStartedServerEvent;
+import org.spongepowered.api.event.game.state.GameStoppingEvent;
 import org.spongepowered.api.plugin.Plugin;
 
 import java.io.File;
@@ -47,8 +48,8 @@ public class FWParty {
 
     @Listener
     public void onServerStart(GameStartedServerEvent event) {
-        partyManager = new PartyManager();
         configManager = new ConfigManager(this, configDir);
+        partyManager = configManager.loadParties();
         configValues = configManager.loadConfig();
         commands = new PartyCommands(this);
         commands.registerCommands();
@@ -58,6 +59,12 @@ public class FWParty {
     @Listener
     public void onServerReload(GameReloadEvent event){
         configValues = configManager.loadConfig();
+        configManager.saveParties(partyManager);
+    }
+
+    @Listener
+    public void onServerStopping(GameStoppingEvent event){
+        configManager.saveParties(partyManager);
     }
 
     public Logger getLogger() {

@@ -6,11 +6,12 @@ import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.text.Text;
 import org.spongepowered.api.text.serializer.TextSerializers;
 
+import java.io.Serializable;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
 
-public class PartyManager {
+public class PartyManager implements Serializable {
 
     private final Map<UUID, UUID> inviteMap = new HashMap<>();
     private final Map<UUID, Party> partyMap = new HashMap<>();

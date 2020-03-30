@@ -285,7 +285,7 @@ public class PartyCommands {
             .build();
     
     private final CommandSpec chat = CommandSpec.builder()
-            .arguments(GenericArguments.remainingJoinedStrings(Text.of("message")))
+            .arguments(GenericArguments.optional(GenericArguments.remainingJoinedStrings(Text.of("message"))))
             .executor((src, args) -> {
                 if (src instanceof Player) {
                     Player player = (Player) src;
@@ -299,8 +299,10 @@ public class PartyCommands {
 	                    }
                     } else {
                     	if (partyManager.isPlayerChatting(player.getUniqueId())) {
+                            player.sendMessages(TextSerializers.FORMATTING_CODE.deserialize("&eParty chat disabilitata!"));
                     		partyManager.removeChattingPlayer(player.getUniqueId());
                     	} else {
+                            player.sendMessages(TextSerializers.FORMATTING_CODE.deserialize("&eParty chat abilitata!"));
                     		partyManager.addChattingPlayer(player.getUniqueId());
                     	}
                     }
