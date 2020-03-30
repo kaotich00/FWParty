@@ -283,18 +283,26 @@ public class PartyCommands {
                 return CommandResult.success();
             })
             .build();
-
+    
     private final CommandSpec chat = CommandSpec.builder()
             .arguments(GenericArguments.remainingJoinedStrings(Text.of("message")))
             .executor((src, args) -> {
                 if (src instanceof Player) {
                     Player player = (Player) src;
                     PartyManager partyManager = plugin.getPartyManager();
-                    if (partyManager.isPlayerInParty(player.getUniqueId()) || partyManager.doesPartyExist(player.getUniqueId())) {
-                        String message = args.<String>getOne("message").orElse("");
-                        partyManager.sendMessageToPartyMembers(partyManager.getPlayerParty(player.getUniqueId()).getLeader(),"&2[PARTY] &a" + player.getName() + ": " + message);
+                    String message = args.<String>getOne("message").orElse("");
+                    if (!message.isEmpty()) {
+	                    if (partyManager.isPlayerInParty(player.getUniqueId()) || partyManager.doesPartyExist(player.getUniqueId())) {
+	                        partyManager.sendMessageToPartyMembers(partyManager.getPlayerParty(player.getUniqueId()).getLeader(),"&2[PARTY] &a" + player.getName() + ": " + message);
+	                    } else {
+	                        player.sendMessages(TextSerializers.FORMATTING_CODE.deserialize(plugin.getConfigValues().not_on_party));
+	                    }
                     } else {
-                        player.sendMessages(TextSerializers.FORMATTING_CODE.deserialize(plugin.getConfigValues().not_on_party));
+                    	if (partyManager.isPlayerChatting(player.getUniqueId())) {
+                    		partyManager.removeChattingPlayer(player.getUniqueId());
+                    	} else {
+                    		partyManager.addChattingPlayer(player.getUniqueId());
+                    	}
                     }
                 } else {
                     src.sendMessage(Text.of("Only players can run that command"));
@@ -309,7 +317,7 @@ public class PartyCommands {
                 if (src instanceof Player) {
                     src.sendMessage(TextSerializers.FORMATTING_CODE.deserialize(
                             "&aParty system made by &6Tigierrei\n" +
-                                    "&aChat system made by &6Markus27"
+                                    "&aChat system made by &6Markus__27"
                     ));
                 } else {
                     src.sendMessage(Text.of("Only players can run that command"));

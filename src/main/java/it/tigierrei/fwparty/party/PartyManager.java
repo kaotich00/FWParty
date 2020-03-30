@@ -15,6 +15,7 @@ public class PartyManager {
     private final Map<UUID, UUID> inviteMap = new HashMap<>();
     private final Map<UUID, Party> partyMap = new HashMap<>();
     private final Map<UUID, Party> playerMap = new HashMap<>();
+    private final Map<UUID, Boolean> isPlayerChat = new HashMap<>();
 
     public void addInvite(UUID playerInvited, UUID partyToJoin){
         inviteMap.put(playerInvited, partyToJoin);
@@ -38,6 +39,7 @@ public class PartyManager {
             Party party = partyMap.get(partyLeader);
             party.addPlayer(playerToAdd);
             playerMap.put(playerToAdd, party);
+            isPlayerChat.put(playerToAdd, false);
         }else{
             throw new InvalidPartyException();
         }
@@ -48,6 +50,7 @@ public class PartyManager {
             Party party = partyMap.get(partyLeader);
             party.removePlayer(player);
             playerMap.remove(player);
+            isPlayerChat.remove(player);
         }
     }
 
@@ -56,6 +59,7 @@ public class PartyManager {
             Party party = playerMap.remove(player);
             party.removePlayer(player);
             playerMap.remove(player);
+            isPlayerChat.remove(player);
         }
     }
 
@@ -90,10 +94,12 @@ public class PartyManager {
         Party party = new Party(partyLeader, password);
         partyMap.put(partyLeader, party);
         playerMap.put(partyLeader, party);
+        isPlayerChat.put(partyLeader, false);
     }
 
     public void createParty(UUID partyLeader){
         createParty(partyLeader, null);
+        isPlayerChat.put(partyLeader, false);
     }
 
     public int getPartySize(UUID partyLeader) throws InvalidPartyException {
@@ -120,5 +126,30 @@ public class PartyManager {
             return playerParty.equals(targetParty);
         }
         return false;
+    }
+    
+    /**
+     * Adding a player UUID to a list of players who have activated party chat.
+     * @param player
+     */
+    public void addChattingPlayer(UUID player) {
+    	isPlayerChat.replace(player, true);
+    }
+    
+    /**
+     * Removing a player UUID to a list of players who have activated party chat.
+     * @param player
+     */
+    public void removeChattingPlayer(UUID player) {
+    	isPlayerChat.replace(player, false);
+    }
+    
+    /**
+     * If the player UUID has activated the party chat.
+     * @param player
+     * @return Boolean 
+     */
+    public Boolean isPlayerChatting(UUID player) {
+    	return isPlayerChat.get(player);
     }
 }
