@@ -9,9 +9,12 @@ import org.spongepowered.api.command.CommandResult;
 import org.spongepowered.api.command.args.GenericArguments;
 import org.spongepowered.api.command.spec.CommandSpec;
 import org.spongepowered.api.entity.living.player.Player;
+import org.spongepowered.api.entity.living.player.User;
+import org.spongepowered.api.service.user.UserStorageService;
 import org.spongepowered.api.text.Text;
 import org.spongepowered.api.text.serializer.TextSerializers;
 
+import java.util.Optional;
 import java.util.UUID;
 
 public class PartyCommands {
@@ -54,14 +57,16 @@ public class PartyCommands {
                     PartyManager partyManager = plugin.getPartyManager();
                     if (partyManager.hasPendingInvite(player.getUniqueId())) {
                         if (!partyManager.isPartyLeader(player.getUniqueId())) {
-                            Player partyLeader = Sponge.getServer().getPlayer(partyManager.removeInvite(player.getUniqueId())).get();
+                            UUID partyLeaderUUID = partyManager.removeInvite(player.getUniqueId());
                             try {
-                                if (partyManager.getPartySize(partyLeader.getUniqueId()) >= plugin.getConfigValues().party_limit) {
+                                if (partyManager.getPartySize(partyLeaderUUID) >= plugin.getConfigValues().party_limit) {
                                     player.sendMessages(TextSerializers.FORMATTING_CODE.deserialize(plugin.getConfigValues().party_limit_reached));
                                 } else {
-                                    partyManager.addPlayerToParty(player.getUniqueId(), partyLeader.getUniqueId());
-                                    player.sendMessage(TextSerializers.FORMATTING_CODE.deserialize(plugin.getConfigValues().invite_accepted.replace("%player%", partyLeader.getName())));
-                                    partyLeader.sendMessage(TextSerializers.FORMATTING_CODE.deserialize(plugin.getConfigValues().accept_party_notification.replace("%player%", player.getName())));
+                                    partyManager.addPlayerToParty(player.getUniqueId(), partyLeaderUUID);
+                                    Optional<User> partyLeader = Sponge.getServiceManager().provide(UserStorageService.class).get().get(partyLeaderUUID);
+                                    partyLeader.ifPresent(user -> player.sendMessage(TextSerializers.FORMATTING_CODE.deserialize(plugin.getConfigValues().invite_accepted.replace("%player%", user.getName()))));
+                                    Optional<Player> partyLeaderOptional = Sponge.getServer().getPlayer(partyLeaderUUID);
+                                    partyLeaderOptional.ifPresent(value -> value.sendMessage(TextSerializers.FORMATTING_CODE.deserialize(plugin.getConfigValues().accept_party_notification.replace("%player%", player.getName()))));
                                 }
                             } catch (InvalidPartyException e) {
                                 player.sendMessages(TextSerializers.FORMATTING_CODE.deserialize(plugin.getConfigValues().invalid_party));
@@ -86,9 +91,11 @@ public class PartyCommands {
                     Player player = (Player) src;
                     PartyManager partyManager = plugin.getPartyManager();
                     if (partyManager.hasPendingInvite(player.getUniqueId())) {
-                        Player partyLeader = Sponge.getServer().getPlayer(partyManager.removeInvite(player.getUniqueId())).get();
-                        player.sendMessage(TextSerializers.FORMATTING_CODE.deserialize(plugin.getConfigValues().invite_refused.replace("%player%", partyLeader.getName())));
-                        partyLeader.sendMessage(TextSerializers.FORMATTING_CODE.deserialize(plugin.getConfigValues().decline_party_notification.replace("%player%", player.getName())));
+                        UUID partyLeaderUUID = partyManager.removeInvite(player.getUniqueId());
+                        Optional<Player> partyLeaderOptional = Sponge.getServer().getPlayer(partyLeaderUUID);
+                        Optional<User> partyLeader = Sponge.getServiceManager().provide(UserStorageService.class).get().get(partyLeaderUUID);
+                        partyLeader.ifPresent(user -> player.sendMessage(TextSerializers.FORMATTING_CODE.deserialize(plugin.getConfigValues().invite_refused.replace("%player%", user.getName()))));
+                        partyLeaderOptional.ifPresent(value -> value.sendMessage(TextSerializers.FORMATTING_CODE.deserialize(plugin.getConfigValues().decline_party_notification.replace("%player%", player.getName()))));
                     } else {
                         player.sendMessage(TextSerializers.FORMATTING_CODE.deserialize(plugin.getConfigValues().no_invites));
                     }
@@ -120,39 +127,50 @@ public class PartyCommands {
             .build();
 
     private final CommandSpec join = CommandSpec.builder()
-            .arguments(GenericArguments.onlyOne(GenericArguments.player(Text.of("player"))), GenericArguments.onlyOne(GenericArguments.string(Text.of("password"))))
+            .arguments(GenericArguments.onlyOne(GenericArguments.string(Text.of("player"))), GenericArguments.onlyOne(GenericArguments.string(Text.of("password"))))
             .executor(((src, args) -> {
                 if (src instanceof Player) {
                     Player player = (Player) src;
                     PartyManager partyManager = plugin.getPartyManager();
+
                     try {
-                        Player partyLeader = args.<Player>getOne("player").orElseThrow(() -> {
+                        String partyLeaderName = args.<String>getOne("player").orElseThrow(() -> {
                             throw new IllegalArgumentException(plugin.getConfigValues().insufficient_parameters);
                         });
                         String password = args.<String>getOne("password").orElseThrow(() -> {
                             throw new IllegalArgumentException(plugin.getConfigValues().insufficient_parameters);
                         });
-                        if (partyManager.isPlayerInParty(player.getUniqueId())) {
-                            player.sendMessages(TextSerializers.FORMATTING_CODE.deserialize(plugin.getConfigValues().already_in_party));
-                        } else if(partyManager.doesPartyExist(partyLeader.getUniqueId())){
-                            Party party = partyManager.getParty(partyLeader.getUniqueId());
-                            if (party.getPassword().equals(password)) {
-                                try {
-                                    if (partyManager.getPartySize(partyLeader.getUniqueId()) >= plugin.getConfigValues().party_limit) {
-                                        player.sendMessages(TextSerializers.FORMATTING_CODE.deserialize(plugin.getConfigValues().party_limit_reached));
-                                    } else {
-                                        partyManager.addPlayerToParty(player.getUniqueId(), partyLeader.getUniqueId());
-                                        player.sendMessage(TextSerializers.FORMATTING_CODE.deserialize(plugin.getConfigValues().invite_accepted.replace("%player%", partyLeader.getName())));
-                                        partyLeader.sendMessage(TextSerializers.FORMATTING_CODE.deserialize(plugin.getConfigValues().accept_party_notification.replace("%player%", player.getName())));
+                        Optional<User> optionalUser = Sponge.getServiceManager().provide(UserStorageService.class).get().get(partyLeaderName);
+                        if(optionalUser.isPresent()){
+                            UUID partyLeaderUUID = optionalUser.get().getUniqueId();
+                            if (partyManager.isPlayerInParty(player.getUniqueId())) {
+                                player.sendMessages(TextSerializers.FORMATTING_CODE.deserialize(plugin.getConfigValues().already_in_party));
+                            } else if(partyManager.doesPartyExist(partyLeaderUUID)){
+                                Party party = partyManager.getParty(partyLeaderUUID);
+                                if (party.getPassword().equals(password)) {
+                                    try {
+                                        if (partyManager.getPartySize(partyLeaderUUID) >= plugin.getConfigValues().party_limit) {
+                                            player.sendMessages(TextSerializers.FORMATTING_CODE.deserialize(plugin.getConfigValues().party_limit_reached));
+                                        } else {
+                                            partyManager.addPlayerToParty(player.getUniqueId(), partyLeaderUUID);
+                                            player.sendMessage(TextSerializers.FORMATTING_CODE.deserialize(plugin.getConfigValues().invite_accepted.replace("%player%", partyLeaderName)));
+                                            Optional<Player> partyLeaderOptional = Sponge.getServer().getPlayer(partyLeaderUUID);
+                                            if(partyLeaderOptional.isPresent()){
+                                                Player partyLeader = partyLeaderOptional.get();
+                                                partyLeader.sendMessage(TextSerializers.FORMATTING_CODE.deserialize(plugin.getConfigValues().accept_party_notification.replace("%player%", player.getName())));
+                                            }
+                                        }
+                                    } catch (InvalidPartyException e) {
+                                        player.sendMessages(TextSerializers.FORMATTING_CODE.deserialize(plugin.getConfigValues().invalid_party));
                                     }
-                                } catch (InvalidPartyException e) {
-                                    player.sendMessages(TextSerializers.FORMATTING_CODE.deserialize(plugin.getConfigValues().invalid_party));
+                                } else {
+                                    player.sendMessages(TextSerializers.FORMATTING_CODE.deserialize(plugin.getConfigValues().wrong_password));
                                 }
-                            } else {
-                                player.sendMessages(TextSerializers.FORMATTING_CODE.deserialize(plugin.getConfigValues().wrong_password));
+                            }else{
+                                player.sendMessages(TextSerializers.FORMATTING_CODE.deserialize(plugin.getConfigValues().invalid_party));
                             }
                         }else{
-                            player.sendMessages(TextSerializers.FORMATTING_CODE.deserialize(plugin.getConfigValues().invalid_party));
+                            throw new IllegalArgumentException(plugin.getConfigValues().insufficient_parameters);
                         }
                     } catch (IllegalArgumentException e) {
                         player.sendMessages(TextSerializers.FORMATTING_CODE.deserialize(e.getMessage()));

@@ -1,6 +1,7 @@
 package it.tigierrei.fwparty.party;
 
 import org.spongepowered.api.Sponge;
+import org.spongepowered.api.service.user.UserStorageService;
 
 import java.io.Serializable;
 import java.util.*;
@@ -68,13 +69,14 @@ public class Party implements Serializable {
     }
 
     public String getPartyInfo(){
+        UserStorageService userStorageService = Sponge.getServiceManager().provide(UserStorageService.class).get();
         StringBuilder stringBuilder = new StringBuilder()
                 .append("&6Party leader: &a")
-                .append(Sponge.getServer().getPlayer(getLeader()).get().getName())
+                .append(userStorageService.get(leader).get().getName())
                 .append("\n")
                 .append("&6Members list: &a\n");
         for(UUID player : playerList){
-            stringBuilder.append(Sponge.getServer().getPlayer(player).get().getName()).append("\n");
+            stringBuilder.append(userStorageService.get(player).get().getName()).append("\n");
         }
         return stringBuilder.toString();
     }

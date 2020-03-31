@@ -48,12 +48,15 @@ public class PlayerListener {
     }
 
     @Listener(order = Order.FIRST, beforeModifications = true)
-    public void onPlayerChat(MessageChannelEvent.Chat event, @Root Player player) {
-        String message = event.getRawMessage().toPlain();
-        PartyManager partyManager = plugin.getPartyManager();
-        if (partyManager.isPlayerChatting(player.getUniqueId())) {
-            event.setCancelled(true);
-            partyManager.sendMessageToPartyMembers(partyManager.getPlayerParty(player.getUniqueId()).getLeader(),"&2[PARTY] &a" + player.getName() + ": " + message);
+    public void onPlayerChat(MessageChannelEvent.Chat event) {
+        if(event.getSource() instanceof Player){
+            Player player = (Player)event.getSource();
+            String message = event.getRawMessage().toPlain();
+            PartyManager partyManager = plugin.getPartyManager();
+            if (partyManager.isPlayerChatting(player.getUniqueId())) {
+                event.setCancelled(true);
+                partyManager.sendMessageToPartyMembers(partyManager.getPlayerParty(player.getUniqueId()).getLeader(),"&2[PARTY] &a" + player.getName() + ": " + message);
+            }
         }
     }
 }
