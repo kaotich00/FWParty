@@ -2,17 +2,12 @@ package it.tigierrei.fwparty.listener;
 
 import it.tigierrei.fwparty.FWParty;
 import it.tigierrei.fwparty.party.PartyManager;
-import org.spongepowered.api.effect.potion.PotionEffectType;
-import org.spongepowered.api.effect.potion.PotionEffectTypes;
 import org.spongepowered.api.entity.Entity;
 import org.spongepowered.api.entity.living.player.Player;
-import org.spongepowered.api.entity.projectile.Projectile;
-import org.spongepowered.api.entity.projectile.source.ProjectileSource;
 import org.spongepowered.api.event.Listener;
 import org.spongepowered.api.event.Order;
 import org.spongepowered.api.event.cause.entity.damage.source.EntityDamageSource;
 import org.spongepowered.api.event.cause.entity.damage.source.IndirectEntityDamageSource;
-import org.spongepowered.api.event.entity.ChangeEntityPotionEffectEvent;
 import org.spongepowered.api.event.entity.DamageEntityEvent;
 import org.spongepowered.api.event.filter.cause.Root;
 import org.spongepowered.api.event.message.MessageChannelEvent;
@@ -52,22 +47,13 @@ public class PlayerListener {
         }
     }
 
-
     @Listener(order = Order.FIRST, beforeModifications = true)
-    public void onPotionEffectGain(ChangeEntityPotionEffectEvent event) {
-        if(event.getTargetEntity() instanceof Player  && event.getSource() instanceof Projectile){
-            ProjectileSource projectileSource = ((Projectile) event.getSource()).getShooter();
-            if(projectileSource instanceof Player){
-                Player target = (Player)event.getTargetEntity();
-                Player thrower = (Player)projectileSource;
-                if(plugin.getPartyManager().areInSameParty(target, thrower)){
-                    PotionEffectType effect = event.getPotionEffect().getType();
-                    if(effect == PotionEffectTypes.BLINDNESS || effect == PotionEffectTypes.INSTANT_DAMAGE || effect  == PotionEffectTypes.POISON){
-                        event.setCancelled(true);
-                    }
-                }
-            }
+    public void onPlayerChat(MessageChannelEvent.Chat event, @Root Player player) {
+        String message = event.getRawMessage().toPlain();
+        PartyManager partyManager = plugin.getPartyManager();
+        if (partyManager.isPlayerChatting(player.getUniqueId())) {
+            event.setCancelled(true);
+            partyManager.sendMessageToPartyMembers(partyManager.getPlayerParty(player.getUniqueId()).getLeader(),"&2[PARTY] &a" + player.getName() + ": " + message);
         }
     }
-
 }
