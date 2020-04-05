@@ -8,6 +8,7 @@ import it.tigierrei.fwparty.listener.PlayerListener;
 import it.tigierrei.fwparty.party.PartyManager;
 import ninja.leaping.configurate.objectmapping.GuiceObjectMapperFactory;
 import org.slf4j.Logger;
+import org.spongepowered.api.event.world.SaveWorldEvent;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.config.ConfigDir;
 import org.spongepowered.api.event.Listener;
@@ -15,6 +16,8 @@ import org.spongepowered.api.event.game.GameReloadEvent;
 import org.spongepowered.api.event.game.state.GameStartedServerEvent;
 import org.spongepowered.api.event.game.state.GameStoppingServerEvent;
 import org.spongepowered.api.plugin.Plugin;
+
+
 
 import java.io.File;
 
@@ -58,6 +61,11 @@ public class FWParty {
     @Listener
     public void onServerReload(GameReloadEvent event){
         configValues = configManager.loadConfig();
+        configManager.saveParties(partyManager);
+    }
+
+    @Listener
+    public void onWorldSave(SaveWorldEvent event){
         configManager.saveParties(partyManager);
     }
 
