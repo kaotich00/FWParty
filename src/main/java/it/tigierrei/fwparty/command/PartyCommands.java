@@ -1,6 +1,7 @@
 package it.tigierrei.fwparty.command;
 
 import it.tigierrei.fwparty.FWParty;
+import it.tigierrei.fwparty.config.ConfigManager;
 import it.tigierrei.fwparty.exception.InvalidPartyException;
 import it.tigierrei.fwparty.party.Party;
 import it.tigierrei.fwparty.party.PartyManager;
@@ -32,6 +33,7 @@ public class PartyCommands {
                     Player partyLeader = (Player) src;
                     Player playerInvited = args.<Player>getOne("player").get();
                     PartyManager partyManager = plugin.getPartyManager();
+                    ConfigManager configManager = plugin.getConfigManager();
                     if (partyLeader.equals(playerInvited)) {
                         src.sendMessage(TextSerializers.FORMATTING_CODE.deserialize(plugin.getConfigValues().cannot_invite_yourself));
                     } else if (partyManager.doesPartyExist(partyLeader.getUniqueId()) && partyManager.getParty(partyLeader.getUniqueId()).getPlayerList().contains(playerInvited)) {
@@ -41,6 +43,7 @@ public class PartyCommands {
                         plugin.getPartyManager().addInvite(playerInvited.getUniqueId(), partyLeader.getUniqueId());
                         partyLeader.sendMessage(TextSerializers.FORMATTING_CODE.deserialize(plugin.getConfigValues().invite_message.replace("%player%", playerInvited.getName())));
                         playerInvited.sendMessage(TextSerializers.FORMATTING_CODE.deserialize(plugin.getConfigValues().invite_received_message.replace("%player%", partyLeader.getName())));
+                        configManager.saveParties(partyManager);
                     }
                 } else {
                     src.sendMessage(Text.of("Only players can run that command"));
@@ -55,6 +58,7 @@ public class PartyCommands {
                 if (src instanceof Player) {
                     Player player = (Player) src;
                     PartyManager partyManager = plugin.getPartyManager();
+                    ConfigManager configManager = plugin.getConfigManager();
                     if (partyManager.hasPendingInvite(player.getUniqueId())) {
                         if (!partyManager.isPartyLeader(player.getUniqueId())) {
                             UUID partyLeaderUUID = partyManager.removeInvite(player.getUniqueId());
@@ -67,6 +71,7 @@ public class PartyCommands {
                                     partyLeader.ifPresent(user -> player.sendMessage(TextSerializers.FORMATTING_CODE.deserialize(plugin.getConfigValues().invite_accepted.replace("%player%", user.getName()))));
                                     Optional<Player> partyLeaderOptional = Sponge.getServer().getPlayer(partyLeaderUUID);
                                     partyLeaderOptional.ifPresent(value -> value.sendMessage(TextSerializers.FORMATTING_CODE.deserialize(plugin.getConfigValues().accept_party_notification.replace("%player%", player.getName()))));
+                                    configManager.saveParties(partyManager);
                                 }
                             } catch (InvalidPartyException e) {
                                 player.sendMessages(TextSerializers.FORMATTING_CODE.deserialize(plugin.getConfigValues().invalid_party));
@@ -90,12 +95,14 @@ public class PartyCommands {
                 if (src instanceof Player) {
                     Player player = (Player) src;
                     PartyManager partyManager = plugin.getPartyManager();
+                    ConfigManager configManager = plugin.getConfigManager();
                     if (partyManager.hasPendingInvite(player.getUniqueId())) {
                         UUID partyLeaderUUID = partyManager.removeInvite(player.getUniqueId());
                         Optional<Player> partyLeaderOptional = Sponge.getServer().getPlayer(partyLeaderUUID);
                         Optional<User> partyLeader = Sponge.getServiceManager().provide(UserStorageService.class).get().get(partyLeaderUUID);
                         partyLeader.ifPresent(user -> player.sendMessage(TextSerializers.FORMATTING_CODE.deserialize(plugin.getConfigValues().invite_refused.replace("%player%", user.getName()))));
                         partyLeaderOptional.ifPresent(value -> value.sendMessage(TextSerializers.FORMATTING_CODE.deserialize(plugin.getConfigValues().decline_party_notification.replace("%player%", player.getName()))));
+                        configManager.saveParties(partyManager);
                     } else {
                         player.sendMessage(TextSerializers.FORMATTING_CODE.deserialize(plugin.getConfigValues().no_invites));
                     }
@@ -113,9 +120,11 @@ public class PartyCommands {
                 if (src instanceof Player) {
                     Player player = (Player) src;
                     PartyManager partyManager = plugin.getPartyManager();
+                    ConfigManager configManager = plugin.getConfigManager();
                     if (partyManager.isPartyLeader(player.getUniqueId())) {
                         partyManager.sendMessageToPartyMembers(player.getUniqueId(),plugin.getConfigValues().disband_message.replace("%player%",player.getName()));
                         partyManager.deleteParty(player.getUniqueId());
+                        configManager.saveParties(partyManager);
                     } else {
                         player.sendMessages(TextSerializers.FORMATTING_CODE.deserialize(plugin.getConfigValues().error_message));
                     }
@@ -132,14 +141,11 @@ public class PartyCommands {
                 if (src instanceof Player) {
                     Player player = (Player) src;
                     PartyManager partyManager = plugin.getPartyManager();
+                    ConfigManager configManager = plugin.getConfigManager();
 
                     try {
-                        String partyLeaderName = args.<String>getOne("player").orElseThrow(() -> {
-                            throw new IllegalArgumentException(plugin.getConfigValues().insufficient_parameters);
-                        });
-                        String password = args.<String>getOne("password").orElseThrow(() -> {
-                            throw new IllegalArgumentException(plugin.getConfigValues().insufficient_parameters);
-                        });
+                        String partyLeaderName = args.<String>getOne("player").orElseThrow(IllegalArgumentException::new);
+                        String password = args.<String>getOne("password").orElseThrow(IllegalArgumentException::new);
                         Optional<User> optionalUser = Sponge.getServiceManager().provide(UserStorageService.class).get().get(partyLeaderName);
                         if(optionalUser.isPresent()){
                             UUID partyLeaderUUID = optionalUser.get().getUniqueId();
@@ -159,6 +165,7 @@ public class PartyCommands {
                                                 Player partyLeader = partyLeaderOptional.get();
                                                 partyLeader.sendMessage(TextSerializers.FORMATTING_CODE.deserialize(plugin.getConfigValues().accept_party_notification.replace("%player%", player.getName())));
                                             }
+                                            configManager.saveParties(partyManager);
                                         }
                                     } catch (InvalidPartyException e) {
                                         player.sendMessages(TextSerializers.FORMATTING_CODE.deserialize(plugin.getConfigValues().invalid_party));
@@ -189,12 +196,14 @@ public class PartyCommands {
                     Player player = (Player) src;
                     String password = args.<String>getOne("password").orElse(null);
                     PartyManager partyManager = plugin.getPartyManager();
+                    ConfigManager configManager = plugin.getConfigManager();
                     //TODO Il secondo controllo e' ridondante ma lo lascio per chiarezza
                     if (partyManager.isPlayerInParty(player.getUniqueId()) || partyManager.doesPartyExist(player.getUniqueId())) {
                         player.sendMessages(TextSerializers.FORMATTING_CODE.deserialize(plugin.getConfigValues().already_in_party));
                     } else {
                         partyManager.createParty(player.getUniqueId(), password);
                         player.sendMessages(TextSerializers.FORMATTING_CODE.deserialize(plugin.getConfigValues().party_created));
+                        configManager.saveParties(partyManager);
                     }
                 } else {
                     src.sendMessage(Text.of("Only players can run that command"));
@@ -209,13 +218,13 @@ public class PartyCommands {
                 if (src instanceof Player) {
                     Player player = (Player) src;
                     try {
-                        String password = args.<String>getOne("password").orElseThrow(() -> {
-                            throw new IllegalArgumentException(plugin.getConfigValues().insufficient_parameters);
-                        });
+                        String password = args.<String>getOne("password").orElseThrow(IllegalArgumentException::new);
                         PartyManager partyManager = plugin.getPartyManager();
+                        ConfigManager configManager = plugin.getConfigManager();
                         if (partyManager.isPartyLeader(player.getUniqueId())) {
                             partyManager.getParty(player.getUniqueId()).setPassword(password);
                             player.sendMessages(TextSerializers.FORMATTING_CODE.deserialize(plugin.getConfigValues().password_changed));
+                            configManager.saveParties(partyManager);
                         } else {
                             player.sendMessages(TextSerializers.FORMATTING_CODE.deserialize(plugin.getConfigValues().error_message));
                         }
@@ -235,6 +244,7 @@ public class PartyCommands {
                 if (src instanceof Player) {
                     Player player = (Player) src;
                     PartyManager partyManager = plugin.getPartyManager();
+                    ConfigManager configManager = plugin.getConfigManager();
                     if (partyManager.isPlayerInParty(player.getUniqueId())) {
                         if (partyManager.isPartyLeader(player.getUniqueId())) {
                             player.sendMessages(TextSerializers.FORMATTING_CODE.deserialize(plugin.getConfigValues().party_leader_left));
@@ -243,6 +253,7 @@ public class PartyCommands {
                             partyManager.removePlayerFromParty(player.getUniqueId());
                             Sponge.getServer().getPlayer(partyLeader).get().sendMessages(TextSerializers.FORMATTING_CODE.deserialize(plugin.getConfigValues().player_left_party.replace("%player%", player.getName())));
                             player.sendMessages(TextSerializers.FORMATTING_CODE.deserialize(plugin.getConfigValues().player_left));
+                            configManager.saveParties(partyManager);
                         }
                     } else {
                         player.sendMessages(TextSerializers.FORMATTING_CODE.deserialize(plugin.getConfigValues().not_on_party));
@@ -259,10 +270,9 @@ public class PartyCommands {
             .executor((src, args) -> {
                 if (src instanceof Player) {
                     Player player = (Player) src;
-                    Player toBeKicked = args.<Player>getOne("player").orElseThrow(() -> {
-                        throw new IllegalArgumentException(plugin.getConfigValues().insufficient_parameters);
-                    });
+                    Player toBeKicked = args.<Player>getOne("player").orElseThrow(IllegalArgumentException::new);
                     PartyManager partyManager = plugin.getPartyManager();
+                    ConfigManager configManager = plugin.getConfigManager();
                     if (partyManager.isPartyLeader(player.getUniqueId())) {
                         if (partyManager.getPlayerParty(player.getUniqueId()).equals(partyManager.getPlayerParty(toBeKicked.getUniqueId()))) {
                             if (partyManager.isPartyLeader(toBeKicked.getUniqueId())) {
@@ -271,6 +281,7 @@ public class PartyCommands {
                                 partyManager.removePlayerFromParty(toBeKicked.getUniqueId(), player.getUniqueId());
                                 partyManager.sendMessageToPartyMembers(player.getUniqueId(), plugin.getConfigValues().player_kicked.replace("%player%", toBeKicked.getName()));
                                 toBeKicked.sendMessages(TextSerializers.FORMATTING_CODE.deserialize(plugin.getConfigValues().kicked));
+                                configManager.saveParties(partyManager);
                             }
                         } else {
                             player.sendMessages(TextSerializers.FORMATTING_CODE.deserialize(plugin.getConfigValues().player_not_in_party.replace("%player%", toBeKicked.getName())));
