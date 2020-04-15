@@ -5,7 +5,10 @@ import ninja.leaping.configurate.objectmapping.serialize.ConfigSerializable;
 
 @ConfigSerializable
 public class ConfigValues {
-    @Setting(value = "party-limit", comment = "Durata combat log in secondi")
+    @Setting(value = "player-cannote-invite-not-leader")
+    public String player_cannote_invite_not_leader = "&cNon puoi invitare altri player perche' non sei leader di un party";
+
+    @Setting(value = "combat-time", comment = "Durata combat log in secondi")
     public int combat_time = 15;
 
     @Setting(value = "party-limit", comment = "Massimo numero di giocatori per party")
@@ -57,7 +60,7 @@ public class ConfigValues {
     public String already_in_party = "&cSei gia' in un party!";
 
     @Setting(value = "player-already-in-party")
-    public String player_already_in_party = "&c%player% e' già in un party!";
+    public String player_already_in_party = "&c%player% e' gia' in un party!";
 
     @Setting(value = "error-message")
     public String error_message = "&cNon sei in un party oppure non sei il party leader!";

@@ -62,6 +62,10 @@ public class ConfigManager {
         try{
             ObjectOutputStream objectOutputStream = new ObjectOutputStream(new FileOutputStream(partyFile));
             objectOutputStream.writeObject(partyManager);
+            if( objectOutputStream != null ) {
+                objectOutputStream.flush();
+                objectOutputStream.close();
+            }
         }catch (Exception e){
             plugin.getLogger().error("Error while saving parties on file " + partyFile.getName());
         }

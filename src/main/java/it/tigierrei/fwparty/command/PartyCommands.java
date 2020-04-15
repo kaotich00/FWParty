@@ -34,16 +34,25 @@ public class PartyCommands {
                     Player playerInvited = args.<Player>getOne("player").get();
                     PartyManager partyManager = plugin.getPartyManager();
                     ConfigManager configManager = plugin.getConfigManager();
-                    if (partyLeader.equals(playerInvited)) {
-                        src.sendMessage(TextSerializers.FORMATTING_CODE.deserialize(plugin.getConfigValues().cannot_invite_yourself));
-                    } else if (partyManager.doesPartyExist(partyLeader.getUniqueId()) && partyManager.getParty(partyLeader.getUniqueId()).getPlayerList().contains(playerInvited)) {
-                        src.sendMessage(TextSerializers.FORMATTING_CODE.deserialize(plugin.getConfigValues().player_already_in_party.replace("%player%", playerInvited.getName())));
-                    } else {
-                        plugin.getPartyManager().createParty(partyLeader.getUniqueId());
-                        plugin.getPartyManager().addInvite(playerInvited.getUniqueId(), partyLeader.getUniqueId());
-                        partyLeader.sendMessage(TextSerializers.FORMATTING_CODE.deserialize(plugin.getConfigValues().invite_message.replace("%player%", playerInvited.getName())));
-                        playerInvited.sendMessage(TextSerializers.FORMATTING_CODE.deserialize(plugin.getConfigValues().invite_received_message.replace("%player%", partyLeader.getName())));
-                        configManager.saveParties(partyManager);
+                    // Verify that the player is a party leader
+                    if( partyManager.isPartyLeader(partyLeader.getUniqueId() ) ){
+                        // Verify that the player is not inviting himself
+                        if (partyLeader.equals(playerInvited)) {
+                            src.sendMessage(TextSerializers.FORMATTING_CODE.deserialize(plugin.getConfigValues().cannot_invite_yourself));
+                        // Verify that the player invited is not in a party
+                        } else if ( partyManager.isPlayerInParty( playerInvited.getUniqueId() ) ) {
+                            src.sendMessage(TextSerializers.FORMATTING_CODE.deserialize(plugin.getConfigValues().player_already_in_party.replace("%player%", playerInvited.getName())));
+                        } else {
+                            // Se non esiste il party ne creo uno
+                            if( !plugin.getPartyManager().doesPartyExist(partyLeader.getUniqueId()) )
+                                plugin.getPartyManager().createParty(partyLeader.getUniqueId());
+                            plugin.getPartyManager().addInvite(playerInvited.getUniqueId(), partyLeader.getUniqueId());
+                            partyLeader.sendMessage(TextSerializers.FORMATTING_CODE.deserialize(plugin.getConfigValues().invite_message.replace("%player%", playerInvited.getName())));
+                            playerInvited.sendMessage(TextSerializers.FORMATTING_CODE.deserialize(plugin.getConfigValues().invite_received_message.replace("%player%", partyLeader.getName())));
+                            configManager.saveParties(partyManager);
+                        }
+                    }else{
+                        src.sendMessage(TextSerializers.FORMATTING_CODE.deserialize(plugin.getConfigValues().player_cannote_invite_not_leader));
                     }
                 } else {
                     src.sendMessage(Text.of("Only players can run that command"));
